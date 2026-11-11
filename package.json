@@ -1,0 +1,21 @@
+{
+  "name": "bookmark-house",
+  "version": "2.4.7",
+  "type": "module",
+  "private": true,
+  "description": "Chrome extension for local webpage collections and bookmark management",
+  "scripts": {
+    "test": "node --test tests/*.mjs",
+    "audit:secrets": "node tools/audit_source.mjs",
+    "prepare:hooks": "git config core.hooksPath .githooks",
+    "audit:staged": "python tools/scan_secrets.py --staged && node tools/audit_source.mjs --staged"
+  },
+  "devDependencies": {
+    "@secretlint/node": "^13.1.0",
+    "@secretlint/secretlint-rule-preset-recommend": "^13.1.0",
+    "fake-indexeddb": "^6.2.6",
+    "jsdom": "^29.1.1",
+    "secretlint": "^13.1.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,40 @@
+/* Native bookmarks reuse the web collection card surface and typography. */
+.bookmark-library{border:0;border-radius:0;background:transparent;overflow:visible}
+.bookmark-library .collection-top{padding:0 0 16px;flex-wrap:wrap}
+.bookmark-library .list-wrap{overflow:visible}
+.bookmark-library .context-bar{border:1px solid var(--line);border-radius:10px;margin-bottom:16px;padding:14px 18px}
+.bookmark-library .bulkbar{border:1px solid #52664b;border-radius:10px;margin-bottom:16px;padding:12px 16px;flex-wrap:wrap}
+.bookmark-selection-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--muted);padding:0 2px 13px}
+.bookmark-selection-row label{display:inline-flex;align-items:center;gap:9px;cursor:pointer;min-height:28px}
+.bookmark-selection-row label:focus-within{color:var(--ink)}
+.bookmark-selection-row>span{display:flex;align-items:center;gap:6px}.bookmark-selection-row .icon{height:13px;width:13px}
+.bookmark-library{container:bookmark-library / inline-size}
+.bookmark-grid{align-items:start}
+.bookmark-card{content-visibility:auto;contain-intrinsic-size:auto 410px}
+.bookmark-card.selected{border-color:var(--accent);background:#252f28;box-shadow:inset 0 0 0 1px #b8c9ad28}
+.bookmark-card:focus-within{border-color:#65755d}
+.bookmark-card-heading{margin:0;font:inherit}
+.bookmark-card-title{text-align:left;padding:0;max-width:100%}
+.bookmark-card-select{display:grid;place-items:center;min-width:22px;min-height:28px;cursor:pointer}
+.bookmark-card-select:has(input:disabled){cursor:default}
+.bookmark-card-content.can-drag,.bookmark-card-content.can-drag a{cursor:grab}.bookmark-card-content.can-drag:active{cursor:grabbing}
+.bookmark-card-excerpt,.bookmark-card-address{font-size:12px;line-height:1.95;color:var(--muted);margin:0 0 18px;overflow-wrap:anywhere}
+.bookmark-card-address{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bookmark-card-details{margin-top:4px}
+.bookmark-card-chip{font-size:10px;color:var(--accent-text);background:var(--soft);border:1px solid #3b493c;border-radius:5px;padding:3px 6px;max-width:65%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bookmark-card-chip.is-duplicate{color:var(--warning);background:#332c23;border-color:#544937}.bookmark-card-chip.is-keeper{color:#c4d8b6;border-color:#59704b}
+.bookmark-card-footer{justify-content:space-between}
+.bookmark-card-folder{display:flex;align-items:center;gap:6px;min-width:0;color:var(--muted);font-size:10px;line-height:1.6;flex:1}
+.bookmark-card-folder>.icon{width:12px;height:12px}.bookmark-card-folder>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bookmark-card-actions{display:flex;gap:1px;flex-shrink:0}.bookmark-card-actions .icon-button{width:28px;height:28px;padding:5px}.bookmark-card-actions .icon{width:14px;height:14px}
+.bookmark-card-actions .has-content{color:var(--accent)}.bookmark-card-actions .delete-bookmark:hover:not(:disabled){color:var(--danger);background:var(--danger-bg)}
+.bookmark-library .list-footer{padding:18px 0;border-top:0;flex-wrap:wrap}
+.bookmark-library .empty-state{border:1px dashed var(--control-border);border-radius:13px;background:var(--surface)}
+/* Keep the overview subordinate to the collection itself. */
+.stats{gap:0;padding:4px 0;background:var(--surface);border:1px solid var(--line);border-radius:11px;margin-bottom:27px}
+.stats .stat-card{border:0;border-right:1px solid var(--line);border-radius:0;background:transparent;padding:12px 20px;display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:center}
+.stats .stat-card:last-child{border-right:0}.stats .stat-card>span{font-size:11px}.stats .stat-card>span>.icon{display:none}.stats .stat-card strong{font-size:23px;margin:0;grid-column:2;grid-row:1 / span 2}.stats .stat-card small{font-size:10px;grid-column:1;margin-top:4px;line-height:1.6}.stats .stat-card:hover{background:#ffffff03}.stats .stat-card[aria-pressed=true]{background:var(--soft);box-shadow:inset 0 -2px var(--accent)}
+@media(max-width:1100px){.stats .stat-card{padding:11px 14px}.stats .stat-card small{display:none}.stats .stat-card strong{font-size:22px}.bookmark-library .collection-top{padding:0 0 14px}}
+@container bookmark-library (max-width:900px){.bookmark-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container bookmark-library (max-width:570px){.bookmark-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.bookmark-selection-row>span{font-size:10px}.bookmark-library .collection-top{row-gap:13px}.bookmark-library .list-controls{flex:1;justify-content:flex-end}.bookmark-library .list-controls select{max-width:145px}.stats .stat-card:nth-child(2){border-right:0}.stats .stat-card:nth-child(-n+2){border-bottom:1px solid var(--line)}.stats .stat-card{padding:12px 15px}.stats .stat-card strong{font-size:22px}.bookmark-card-actions .icon-button{width:31px;height:34px}}

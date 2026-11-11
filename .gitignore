@@ -1,0 +1,41 @@
+# Dependencies and local tools
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Credentials and private configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+tokens*.json
+auth*.json
+
+# User data and local exports
+exports/
+backups/
+captures/
+screenshots/
+private-data/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+
+# Generated release, diagnostic and audit output
+dist/
+artifacts/
+coverage/
+*.zip
+*.crx
+*.report.json
+audit-output/
