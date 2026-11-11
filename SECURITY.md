@@ -27,4 +27,4 @@ npm run audit:staged
 
 ## 扩展数据行为
 
-收藏与内部回收站保存在当前浏览器的本地扩展空间；Chrome 原生书签受浏览器自身同步设置影响。按站点授权后的网页访问、截图与数据保留规则见[隐私政策](https://leeguandong.github.io/bookmark-house-privacy/)。
+收藏与内部回收站保存在当前浏览器的本地扩展空间；Chrome 原生书签受浏览器自身同步设置影响。按站点授权后的网页访问、截图与数据保留规则见[隐私政策](https://leeguandong.github.io/bookmark-house/privacy/)。

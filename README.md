@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Chrome-109%2B-555b63" alt="Chrome 109+">
 </p>
 <p align="center">
-  <a href="#快速开始">快速开始</a> · <a href="docs/getting-started.md">使用指南</a> · <a href="docs/development.md">开发指南</a> · <a href="CONTRIBUTING.md">参与贡献</a> · <a href="https://leeguandong.github.io/bookmark-house-privacy/">隐私政策</a>
+  <a href="#快速开始">快速开始</a> · <a href="docs/getting-started.md">使用指南</a> · <a href="docs/development.md">开发指南</a> · <a href="CONTRIBUTING.md">参与贡献</a> · <a href="https://leeguandong.github.io/bookmark-house/privacy/">隐私政策</a>
 </p>
 
 书签小屋是一款开源 Chrome 扩展，把网页卡片收藏与浏览器书签管理放在同一个空间。看到值得保留的内容，可以随手保存；回来时，通过封面、摘句、备注和收藏日期找到它。
@@ -53,7 +53,7 @@ Windows / Linux 默认快捷键为 `Alt+Shift+S`，macOS 为 `Command+Shift+S`�
 - 拖拽支持地址栏的网址、网页内链接和其他应用分享的链接；Chrome 顶部的整个标签页不能直接拖入管理页面。
 - 保存当前页使用用户主动触发的临时访问权限。补充已保存页面时，会按需请求对应站点的可选权限。
 - 动态页面、登录限制或网站防护可能影响封面和正文提取；可以保留原页打开后重试，也可自行编辑标题、摘句和备注。
-- 扩展没有接入远程 AI、广告或第三方统计服务。详细数据处理方式见[隐私政策](https://leeguandong.github.io/bookmark-house-privacy/)。
+- 扩展没有接入远程 AI、广告或第三方统计服务。详细数据处理方式见[隐私政策](https://leeguandong.github.io/bookmark-house/privacy/)。
 
 ## 项目结构
 

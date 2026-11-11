@@ -43,4 +43,4 @@
 
 重要收藏应另行导出。导出的文件可能包含私人内容，请保存在自己的受控位置，不要提交到 Git 仓库。
 
-完整数据说明见[隐私政策](https://leeguandong.github.io/bookmark-house-privacy/)。
+完整数据说明见[隐私政策](https://leeguandong.github.io/bookmark-house/privacy/)。

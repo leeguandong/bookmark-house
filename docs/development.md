@@ -29,7 +29,7 @@ Windows 若只提供 `py` 命令，可直接使用 `py -3` 执行 `scripts/` 下
 
 `extension/` 是浏览器运行目录，保留其模块和页面间的相对引用。`tests/` 从此目录导入源码。`scripts/` 中的检查以仓库根目录为扫描范围，打包器只从 `extension/` 读取运行文件，并附入根目录的 MIT 许可证。
 
-`docs/` 保存使用与维护说明。公开隐私政策的兼容地址由独立的 `bookmark-house-privacy` 仓库托管，不依赖源码仓库的文件布局。
+`docs/` 保存使用与维护说明，并通过 GitHub Pages 从 `main` 分支的 `/docs` 目录发布。中英文隐私政策统一在[公开政策页](https://leeguandong.github.io/bookmark-house/privacy/)，源文件为 `extension/privacy.html` 与 `extension/privacy.css`。修改后运行 `npm run build:policy`，将生成的 `docs/privacy/index.html` 一并提交；无需为政策文案更新上传新的扩展包。
 
 ## 验证修改
 

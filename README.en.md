@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Chrome-109%2B-555b63" alt="Chrome 109+">
 </p>
 <p align="center">
-  <a href="#quick-start">Quick start</a> · <a href="docs/getting-started.en.md">User guide</a> · <a href="docs/development.en.md">Development</a> · <a href="CONTRIBUTING.md">Contributing</a> · <a href="https://leeguandong.github.io/bookmark-house-privacy/#english">Privacy</a>
+  <a href="#quick-start">Quick start</a> · <a href="docs/getting-started.en.md">User guide</a> · <a href="docs/development.en.md">Development</a> · <a href="CONTRIBUTING.md">Contributing</a> · <a href="https://leeguandong.github.io/bookmark-house/privacy/#english">Privacy</a>
 </p>
 
 Bookmark House is an open-source Chrome extension that brings webpage cards and native bookmark management into one space. Save something worth keeping, then find it again through covers, excerpts, notes and save dates.
@@ -56,7 +56,7 @@ Switching languages preserves the current view, search, selection and unsaved po
 - Drag an address-bar URL or a link inside a webpage. Entire Chrome tabs cannot be dropped directly into the manager.
 - The toolbar uses temporary access to the page you actively choose. Updating a saved page may ask for optional access to that website.
 - Dynamic pages, login requirements and website protections may limit covers or excerpts. Keep the original page open and try updating its content, or edit the title, excerpt and note manually.
-- The extension has no advertising, third-party analytics or remote AI integration. A full English policy is available through **Privacy** inside the extension; the public [privacy page](https://leeguandong.github.io/bookmark-house-privacy/#english) describes storage, access, retention and deletion.
+- The extension has no advertising, third-party analytics or remote AI integration. A full English policy is available through **Privacy** inside the extension; the public [privacy page](https://leeguandong.github.io/bookmark-house/privacy/#english) describes storage, access, retention and deletion.
 
 ## Repository layout
 

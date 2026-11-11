@@ -5,6 +5,7 @@ const root=new URL('../',import.meta.url),target=new URL('docs/privacy/index.htm
 const dom=new JSDOM(fs.readFileSync(new URL('extension/privacy.html',root),'utf8'));
 const doc=dom.window.document;
 doc.querySelectorAll('script,link[rel="icon"]').forEach(element=>element.remove());
+const canonical=doc.createElement('link');canonical.rel='canonical';canonical.href='https://leeguandong.github.io/bookmark-house/privacy/';doc.head.append(canonical);
 const style=doc.createElement('style');style.textContent=fs.readFileSync(new URL('extension/privacy.css',root),'utf8').replaceAll('\r\n','\n');
 doc.querySelector('link[rel="stylesheet"]').replaceWith(style);
 doc.querySelector('title').textContent='书签小屋 · 隐私政策 / Bookmark House · Privacy policy';

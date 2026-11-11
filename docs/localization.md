@@ -33,4 +33,4 @@ The localization checker parses module messages, validates static HTML keys, ens
 
 When adding a view, route authored text through these helpers and keep user data outside translation calls. Do not use a document-wide replacement or MutationObserver to translate saved content.
 
-The extension privacy page follows the chosen UI language. `npm run build:policy` generates a standalone bilingual policy snapshot with language anchors and no JavaScript or external resources. Keep the policy-hosting repository in sync when publishing a policy update; do not alter other product policies.
+The extension privacy page follows the chosen UI language. `npm run build:policy` generates a standalone bilingual policy snapshot with language anchors and no JavaScript or external resources. Commit the generated `docs/privacy/index.html` with policy updates; GitHub Pages publishes it from this repository at https://leeguandong.github.io/bookmark-house/privacy/. The legacy repository remains available for existing links and other product policies.

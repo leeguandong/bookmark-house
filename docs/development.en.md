@@ -32,7 +32,7 @@ If Windows only provides the `py` launcher, run the corresponding Python script 
 
 Keep loadable files under `extension/` and preserve their relative references. Tests import from that directory. Scripts operate on the repository root for scans, but package only extension runtime files and the root MIT license.
 
-Documentation belongs in `docs/`. Public policy hosting uses the separate `bookmark-house-privacy` repository so the established store URL does not depend on the source layout.
+Documentation belongs in `docs/`. GitHub Pages publishes this directory from the `main` branch. The bilingual [public privacy policy](https://leeguandong.github.io/bookmark-house/privacy/#english) is maintained in this repository. Edit `extension/privacy.html` and `extension/privacy.css`, run `npm run build:policy`, and commit the generated `docs/privacy/index.html` too. Policy copy and hosting updates do not require uploading a new extension package.
 
 ## Validation
 
