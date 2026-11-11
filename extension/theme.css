@@ -10,3 +10,16 @@ body.install-guide{background:var(--paper);color:var(--ink)}.install-guide secti
 @media(max-width:1100px){:root{--sidebar-width:220px;--sidebar-half:110px}}
 @media(max-width:760px){:root{--sidebar-width:244px;--sidebar-half:0px}.sidebar-open .sidebar-backdrop{display:block;position:fixed;inset:0;background:#0008;backdrop-filter:blur(3px);z-index:19}}
 .install-guide code{background:var(--surface-raised);color:var(--accent)}.install-guide .note{border-color:var(--line)}
+
+/* Interface language follows the same focus and contrast rules as other controls. */
+.language-control{display:inline-flex;align-items:center;flex-shrink:0;margin:0}
+.language-control select{min-width:90px;max-width:118px;padding:7px 9px;border:1px solid var(--border,#39433d);border-radius:8px;background:var(--surface,#222824);color:var(--text,#e2e7e1);font:inherit;font-size:12px;cursor:pointer}
+.language-control select:focus-visible{outline:2px solid #9ebc96;outline-offset:3px}
+html:lang(en) .heading-actions{flex-wrap:wrap}
+html:lang(en) .nav-item{font-size:13px}
+@media(max-width:1050px){.topbar .local-badge{display:none}}
+
+.topbar .local-badge{flex-shrink:0;white-space:nowrap}.topbar .search{min-width:120px;flex-shrink:1}
+
+/* Translation markers retain the layout and typography of the original text node. */
+.i18n-inline{display:contents!important;color:inherit!important;font:inherit!important;float:none!important;white-space:inherit!important}

@@ -42,7 +42,7 @@ for(const file of files){
     for(const match of value.matchAll(/url\(\s*['"]?([^)'"\s]+)['"]?\s*\)/g))await resource(file,match[1]);
   }
 }
-const docs=[path.join(root,'README.md'),path.join(root,'CONTRIBUTING.md'),path.join(root,'SECURITY.md'),...(await readdir(path.join(root,'docs'))).filter(name=>name.endsWith('.md')).map(name=>path.join(root,'docs',name))];
+const docs=[path.join(root,'README.md'),path.join(root,'README.en.md'),path.join(root,'CONTRIBUTING.md'),path.join(root,'SECURITY.md'),...(await readdir(path.join(root,'docs'))).filter(name=>name.endsWith('.md')).map(name=>path.join(root,'docs',name))];
 for(const file of docs){
   const value=await readFile(file,'utf8');
   for(const match of value.matchAll(/\[[^\]]*\]\(([^\s)]+)\)/g))await resource(file,match[1],root);

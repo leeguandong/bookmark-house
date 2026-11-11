@@ -1,3 +1,4 @@
+import {t as uiText} from './i18n.js';
 // Private snapshots never become Chrome bookmark nodes. A durable copy is
 // committed before removing a native node; restore creates new native IDs.
 export const PRIVATE_TRASH_ID='bookmark-house:private-trash';
@@ -41,8 +42,8 @@ async function deleteSnapshot(engine,tree){
   // if another page added unknown children after our snapshot was saved.
   const nodes=[];walk(tree,n=>nodes.push(n));
   for(const saved of nodes.reverse()){
-    let node;try{[node]=await engine.api.get(saved.id);}catch{if(await nativeNode(engine,saved.id))throw new Error('无法核对待删除的项目。');continue;}
-    if(node.parentId!==saved.parentId||node.title!==saved.title||node.url!==saved.url||node.unmodifiable||node.folderType)throw new Error('项目有外部变化，已保留恢复副本。');
+    let node;try{[node]=await engine.api.get(saved.id);}catch{if(await nativeNode(engine,saved.id))throw new Error(uiText("无法核对待删除的项目。"));continue;}
+    if(node.parentId!==saved.parentId||node.title!==saved.title||node.url!==saved.url||node.unmodifiable||node.folderType)throw new Error(uiText("项目有外部变化，已保留恢复副本。"));
     await engine.api.remove(node.id);
   }
 }
@@ -53,28 +54,28 @@ async function makeEntry(engine,meta,node,position,id){
 export async function executeArchive(engine,meta,plan){
   const id=resolveId(meta,plan.id),node=await nativeNode(engine,id);
   let entry=meta.privateTrash.find(e=>e.id===plan.trashKey);
-  if(!node){if(entry)return;throw new Error('待回收的项目已不存在。');}
-  if(node.parentId!==resolveId(meta,plan.before.parentId)||protectedTree(node)||shape(node)!==plan.expected)throw new Error('项目在整理期间发生变化，已保留原内容。');
+  if(!node){if(entry)return;throw new Error(uiText("待回收的项目已不存在。"));}
+  if(node.parentId!==resolveId(meta,plan.before.parentId)||protectedTree(node)||shape(node)!==plan.expected)throw new Error(uiText("项目在整理期间发生变化，已保留原内容。"));
   if(!entry){entry=await makeEntry(engine,meta,node,plan.position,plan.trashKey);meta.privateTrash.push(entry);}
   await engine.store.set('meta',meta); // Must complete before native deletion.
   const current=await nativeNode(engine,id);
-  if(!current||current.parentId!==node.parentId||shape(current)!==shape(node))throw new Error('项目刚刚发生变化，请刷新后重试。');
+  if(!current||current.parentId!==node.parentId||shape(current)!==shape(node))throw new Error(uiText("项目刚刚发生变化，请刷新后重试。"));
   await deleteSnapshot(engine,entry.tree);
 }
 export function restoreDestination(engine,model,meta,entry){
   const original=entry.position||{},parent=model.nodes.get(resolveId(meta,original.parentId)),fallback=engine.primaryRoot(model);
-  if(!fallback)throw new Error('没有可还原到的文件夹。');
+  if(!fallback)throw new Error(uiText("没有可还原到的文件夹。"));
   return parent&&parent.url===undefined&&parent.depth>0&&!parent.managed&&!parent.inTrash?{parentId:parent.id,index:original.index}:{parentId:fallback.id};
 }
 export async function executeRestore(engine,meta,plan){
   const entry=plan.entry;plan.restoredIds||={};
   const model=await engine.model(),destination=plan.after||restoreDestination(engine,model,meta,entry);
   const parentId=resolveId(meta,destination.parentId),parent=model.nodes.get(parentId);
-  if(!parent||parent.url!==undefined||parent.managed||parent.inTrash||parent.depth===0)throw new Error('还原位置已变化，请重新选择。');
+  if(!parent||parent.url!==undefined||parent.managed||parent.inTrash||parent.depth===0)throw new Error(uiText("还原位置已变化，请重新选择。"));
   async function create(node,target,index){
     let id=plan.restoredIds[node.id],current=id?await nativeNode(engine,id):null;
-    if(id&&!current)throw new Error('还原期间新增的项目被其他页面删除。');
-    if(current&&(current.parentId!==target||current.title!==node.title||current.url!==node.url))throw new Error('还原期间新增的项目被其他页面修改。');
+    if(id&&!current)throw new Error(uiText("还原期间新增的项目被其他页面删除。"));
+    if(current&&(current.parentId!==target||current.title!==node.title||current.url!==node.url))throw new Error(uiText("还原期间新增的项目被其他页面修改。"));
     if(!id){
       const details={parentId:target,title:node.title};if(node.url!==undefined)details.url=node.url;
       const siblings=await engine.api.getChildren(target);
@@ -117,28 +118,28 @@ export async function undoArchive(engine,meta,plan){
     }
     return;
   }
-  if(!entry){if(plan.recovery?.restoredId&&await nativeNode(engine,plan.recovery.restoredId))return;throw new Error('回收站副本已不存在。');}
+  if(!entry){if(plan.recovery?.restoredId&&await nativeNode(engine,plan.recovery.restoredId))return;throw new Error(uiText("回收站副本已不存在。"));}
   plan.recovery||={kind:'restore',entry:copy(entry),after:restoreDestination(engine,await engine.model(),meta,entry)};
   await engine.store.set('meta',meta);await executeRestore(engine,meta,plan.recovery);
 }
 export async function undoRestore(engine,meta,plan){
   const entry=plan.entry,id=plan.restoredId||plan.restoredIds?.[entry.tree.id];
   if(!id){
-    if(plan.createIntent){const children=await engine.api.getChildren(plan.createIntent.parentId);if(children.some(n=>!plan.createIntent.beforeIds.includes(n.id)))throw new Error('新增项目尚未完成核对，已保留全部副本和恢复记录。');}
+    if(plan.createIntent){const children=await engine.api.getChildren(plan.createIntent.parentId);if(children.some(n=>!plan.createIntent.beforeIds.includes(n.id)))throw new Error(uiText("新增项目尚未完成核对，已保留全部副本和恢复记录。"));}
     return;
   }
   const node=await nativeNode(engine,id),existing=meta.privateTrash.find(e=>e.id===entry.id);
-  if(!node){if(existing)return;throw new Error('已还原的项目被其他页面删除。');}
+  if(!node){if(existing)return;throw new Error(uiText("已还原的项目被其他页面删除。"));}
   // During an interrupted restore, remove only recorded creations; unexpected
   // additions keep the partial tree and recovery record intact.
   const expectedIds=new Set(Object.values(plan.restoredIds||{}));let unexpected=false;walk(node,n=>{if(!expectedIds.has(n.id))unexpected=true;});
   const liveIds=new Set();if(plan.undoStarted)for(const root of await engine.api.getTree())walk(root,n=>liveIds.add(n.id));
-  if(unexpected||node.parentId!==resolveId(meta,plan.after.parentId))throw new Error('已还原的项目有外部变化。');
+  if(unexpected||node.parentId!==resolveId(meta,plan.after.parentId))throw new Error(uiText("已还原的项目有外部变化。"));
   const originalById=new Map();walk(entry.tree,n=>originalById.set(plan.restoredIds[n.id],n));
   walk(node,n=>{const old=originalById.get(n.id);if(!old||old.title!==n.title||old.url!==n.url||(n.id!==id&&n.parentId!==plan.restoredIds[old.parentId]))unexpected=true;
     if(old?.children&&JSON.stringify(old.children.map(child=>plan.restoredIds[child.id]).filter(childId=>childId&&(!plan.undoStarted||liveIds.has(childId))))!==JSON.stringify((n.children||[]).map(child=>child.id)))unexpected=true;
   });
-  if(unexpected)throw new Error('已还原的项目有外部变化。');
+  if(unexpected)throw new Error(uiText("已还原的项目有外部变化。"));
   const liveNotes=await engine.store.get('contentNotes')||{},snapshot=copy(entry);snapshot.notes||={};
   for(const [old,currentId] of Object.entries(plan.restoredIds||{})){if(liveNotes[currentId])snapshot.notes[old]=copy(liveNotes[currentId]);else if(plan.restoredId)delete snapshot.notes[old];}
   // Keep the complete original snapshot even if restore stopped halfway.
@@ -150,22 +151,22 @@ export async function migratePrivateTrash(engine){
   const meta=await engine.meta();
   if(meta.privateTrashVersion===1)return {migrated:0};
   const tree=await engine.api.getTree();let legacy=meta.legacyTrashId?await nativeNode(engine,meta.legacyTrashId):null;
-  if(legacy&&(legacy.parentId!==meta.homeId||legacy.url!==undefined||protectedTree(legacy)))throw new Error('旧回收站位置或权限有变化，已保留全部内容，请先检查。');
+  if(legacy&&(legacy.parentId!==meta.homeId||legacy.url!==undefined||protectedTree(legacy)))throw new Error(uiText("旧回收站位置或权限有变化，已保留全部内容，请先检查。"));
   if(!await engine.store.get('privateTrashMigrationBackup'))await engine.store.set('privateTrashMigrationBackup',{tree,date:Date.now(),meta:copy(meta),notes:await engine.store.get('contentNotes')||{}});
   let migrated=0;
   for(const initial of legacy?.children||[]){
     const node=await nativeNode(engine,initial.id);if(!node)continue;
-    if(node.parentId!==legacy.id||shape(node)!==shape(initial))throw new Error('旧回收站内容正在变化，请稍后重新打开。');
+    if(node.parentId!==legacy.id||shape(node)!==shape(initial))throw new Error(uiText("旧回收站内容正在变化，请稍后重新打开。"));
     let entry=meta.privateTrash.find(e=>e.sourceId===node.id);
     if(!entry){entry=await makeEntry(engine,meta,node,meta.originals[node.id]||{parentId:'',path:'原位置已不可用'},`trash:${globalThis.crypto.randomUUID()}`);meta.privateTrash.push(entry);}
     await engine.store.set('meta',meta);
-    const fresh=await nativeNode(engine,node.id);if(!fresh||fresh.parentId!==legacy.id||shape(fresh)!==shape(node))throw new Error('旧回收站内容正在变化，请稍后重新打开。');
+    const fresh=await nativeNode(engine,node.id);if(!fresh||fresh.parentId!==legacy.id||shape(fresh)!==shape(node))throw new Error(uiText("旧回收站内容正在变化，请稍后重新打开。"));
     await deleteSnapshot(engine,entry.tree);
     migrated++;engine.onProgress({label:'迁移本地回收站',completed:migrated,total:legacy.children.length});
   }
   // Only delete the exact app-owned, empty containers, never similarly named folders.
   legacy=meta.legacyTrashId?await nativeNode(engine,meta.legacyTrashId):null;
-  if(legacy){if(legacy.parentId!==meta.homeId||legacy.children?.length||protectedTree(legacy))throw new Error('旧回收站还有新内容，已保留目录，请重新打开重试。');await engine.api.remove(legacy.id);}
+  if(legacy){if(legacy.parentId!==meta.homeId||legacy.children?.length||protectedTree(legacy))throw new Error(uiText("旧回收站还有新内容，已保留目录，请重新打开重试。"));await engine.api.remove(legacy.id);}
   const home=meta.homeId?await nativeNode(engine,meta.homeId):null;
   if(home&&home.title==='书签小屋'&&home.url===undefined&&!home.children?.length&&!protectedTree(home)){
     await engine.api.remove(home.id);delete meta.homeId;
@@ -185,8 +186,8 @@ export function privatePreview(meta){
   return {trashId:PRIVATE_TRASH_ID,signature:JSON.stringify(meta.privateTrash),itemCount:meta.privateTrash.length,bookmarkCount,folderCount};
 }
 export async function emptyPrivateTrash(engine,expected){
-  const meta=await engine.meta();if(meta.pending)throw new Error('请先撤销未完成的操作，再清空回收站。');
-  const snapshot=privatePreview(meta);if(!expected||snapshot.signature!==expected.signature||expected.trashId!==PRIVATE_TRASH_ID)throw new Error('回收站内容已变化，请重新查看数量并确认。');
+  const meta=await engine.meta();if(meta.pending)throw new Error(uiText("请先撤销未完成的操作，再清空回收站。"));
+  const snapshot=privatePreview(meta);if(!expected||snapshot.signature!==expected.signature||expected.trashId!==PRIVATE_TRASH_ID)throw new Error(uiText("回收站内容已变化，请重新查看数量并确认。"));
   if(!snapshot.itemCount)return {deletedItems:0,deletedBookmarks:0,deletedFolders:0,failed:0,remaining:0};
   const nativeTree=await engine.api.getTree(),tree=trashTree(nativeTree,meta),date=Date.now();
   await engine.store.set('trashBackup',{tree,date,meta:copy(meta),notes:{...await engine.store.get('contentNotes'),...privateNotes(meta)}});

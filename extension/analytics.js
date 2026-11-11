@@ -1,3 +1,4 @@
+import {t as uiText,msg as uiMessage,html as uiHtml,locale as uiLocale,date as uiDate} from './i18n.js';
 import {findDuplicates, isLoose, escapeHtml as e, safeOpenUrl,normalizedUrl} from './core.js';
 
 export const DEFAULT_TOPICS = [
@@ -12,21 +13,21 @@ export const DEFAULT_TOPICS = [
 const STOP = new Set('the and for with from this that your you are was have has not our its into how what when why about using use used can will new get home com org net www http https html index page docs documentation official website 你的 我的 我们 这个 那个 一个 一些 什么 如何 可以 进行 使用 通过 已经 以及 相关 内容 首页 官网 官方 网站 页面 在线 收藏 书签 小屋 介绍 简介 更多 最新 分享 每日 以后 再看 测试 出来 全书 自由 每个 发现 空间'.split(/\s+/));
 const SHORT = new Set(['ai','sr','ui','ux','js','3d']);
 const DAY = 86400000;
-const segmenter = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter('zh-CN',{granularity:'word'}) : null;
-const compare = (a,b) => b.count-a.count || a.name?.localeCompare(b.name,'zh-CN') || 0;
+const segmenter = typeof Intl.Segmenter === 'function' ? new Intl.Segmenter(undefined,{granularity:'word'}) : null;
+const compare = (a,b) => b.count-a.count || a.name?.localeCompare(b.name,uiLocale()) || 0;
 const percentage = (count,total) => total ? Math.round(count/total*1000)/10 : 0;
 
 export function parseTopicRules(text) {
   const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  if(lines.length>20) throw new Error('最多可以定义 20 个自定义主题。');
+  if(lines.length>20) throw new Error(uiText("最多可以定义 20 个自定义主题。"));
   const names=new Set();
   return lines.map(line=>{
     const divider=line.search(/[:：]/);
-    if(divider<1) throw new Error('每行请使用“主题名称：关键词，关键词”的格式。');
+    if(divider<1) throw new Error(uiText("每行请使用“主题名称：关键词，关键词”的格式。"));
     const name=line.slice(0,divider).trim(),terms=[...new Set(line.slice(divider+1).split(/[,，;；]/).map(s=>s.trim().toLowerCase()).filter(Boolean))];
-    if(!name||name.length>40||!terms.length||terms.length>30||terms.some(t=>t.length>60)) throw new Error('主题名称最多 40 字，每个主题需要 1–30 个关键词，每词最多 60 字。');
-    if(names.has(name.toLowerCase()))throw new Error('主题名称不能重复。');
-    if(DEFAULT_TOPICS.some(t=>t.name===name))throw new Error('请为自定义主题取更具体的名称，避免与内置主题重名。');
+    if(!name||name.length>40||!terms.length||terms.length>30||terms.some(t=>t.length>60)) throw new Error(uiText("主题名称最多 40 字，每个主题需要 1–30 个关键词，每词最多 60 字。"));
+    if(names.has(name.toLowerCase()))throw new Error(uiText("主题名称不能重复。"));
+    if(DEFAULT_TOPICS.some(t=>t.name===name))throw new Error(uiText("请为自定义主题取更具体的名称，避免与内置主题重名。"));
     names.add(name.toLowerCase());return {id:`custom:${name.toLowerCase()}`,name,terms,custom:true};
   });
 }
@@ -65,7 +66,7 @@ export function analyzeBookmarks(model, {notes={},customTopics=[],now=Date.now()
   const topicMap=new Map(definitions.map(t=>[t.id,{id:t.id,name:t.name,custom:Boolean(t.custom),ids:[],evidence:new Set()}]));
   topicMap.set('unknown',{id:'unknown',name:'待识别主题',ids:[],evidence:new Set()});
   const sources=new Map(),keywords=new Map(),folders=new Map(),items=[],monthMap=new Map();
-  const current=new Date(now),months=Array.from({length:12},(_,i)=>{const date=new Date(current.getFullYear(),current.getMonth()-11+i,1);return {key:`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`,label:`${date.getMonth()+1}月`,count:0,ids:[]};});
+  const current=new Date(now),months=Array.from({length:12},(_,i)=>{const date=new Date(current.getFullYear(),current.getMonth()-11+i,1);return {key:`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`,label:uiDate(date,{month:'short'}),count:0,ids:[]};});
   months.forEach(m=>monthMap.set(m.key,m));
   const issues={loose:[],old:[],stale:[],unknownUse:[],weakTitle:[],duplicates:[],outdatedContent:[]};
   let withContent=0,validUse=0,unknownDates=0;
@@ -95,11 +96,11 @@ export function analyzeBookmarks(model, {notes={},customTopics=[],now=Date.now()
   const keywordRows=[...keywords.values()].map(k=>({...k,count:k.ids.length,score:k.ids.length*Math.log(1+Math.max(1,total)/k.ids.length)})).sort((a,b)=>b.score-a.score||Number(meaningfulTerms.has(b.term))-Number(meaningfulTerms.has(a.term))||a.term.localeCompare(b.term)).slice(0,30);
   const recognized=total-(topicMap.get('unknown')?.ids.length||0),leading=topics.find(t=>t.id!=='unknown');
   const insights=[];
-  if(leading)insights.push(`按现有线索，“${leading.name}”是数量最多的主题，包含 ${leading.count} 条，占当前范围的 ${leading.share}%。`);
-  if(domains[0])insights.push(`收藏最多的来源是 ${domains[0].name}：${domains[0].count} 条，占 ${domains[0].share}%。`);
-  if(total&&recognized<total)insights.push(`${total-recognized} 条尚无明确主题，可补充正文或添加自定义主题词。`);
-  if(issues.old.length)insights.push(`${issues.old.length} 条收藏已超过 180 天，适合挑选回顾；收藏时间不能证明是否已读。`);
-  return {schemaVersion:1,generatedAt:now,basis:'标题、网址路径、文件夹与用户主动补充的正文/笔记；规则匹配与本地分词，未抓取网页正文。',summary:{total,sources:domains.length,recognized,coverage:percentage(recognized,total),withContent,duplicateGroups:groups.length,duplicateCopies:groups.reduce((n,g)=>n+g.length-1,0),knownLastUsed:validUse,unknownLastUsed:issues.unknownUse.length,unknownDates},topics,domains,folders:folderRows,keywords:keywordRows,months,issues,insights,items};
+  if(leading)insights.push(uiMessage`按现有线索，“${leading.custom?leading.name:uiText(leading.name)}”是数量最多的主题，包含 ${leading.count} 条，占当前范围的 ${leading.share}%。`);
+  if(domains[0])insights.push(uiMessage`收藏最多的来源是 ${domains[0].name}：${domains[0].count} 条，占 ${domains[0].share}%。`);
+  if(total&&recognized<total)insights.push(uiMessage`${total-recognized} 条尚无明确主题，可补充正文或添加自定义主题词。`);
+  if(issues.old.length)insights.push(uiMessage`${issues.old.length} 条收藏已超过 180 天，适合挑选回顾；收藏时间不能证明是否已读。`);
+  return {schemaVersion:1,generatedAt:now,basis:uiText("标题、网址路径、文件夹与用户主动补充的正文/笔记；规则匹配与本地分词，未抓取网页正文。"),summary:{total,sources:domains.length,recognized,coverage:percentage(recognized,total),withContent,duplicateGroups:groups.length,duplicateCopies:groups.reduce((n,g)=>n+g.length-1,0),knownLastUsed:validUse,unknownLastUsed:issues.unknownUse.length,unknownDates},topics,domains,folders:folderRows,keywords:keywordRows,months,issues,insights,items};
 }
 
 export function analysisFilterIds(report,type,key) {
@@ -113,7 +114,19 @@ export function analysisFilterIds(report,type,key) {
 }
 
 export function analysisToHtml(report) {
+  report=localizedAnalysis(report);
   const list=rows=>`<ul>${rows.map(text=>`<li>${e(text)}</li>`).join('')}</ul>`;
   const table=(head,rows)=>`<table><thead><tr>${head.map(t=>`<th>${e(t)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(t=>`<td>${e(t)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>书签小屋 · 分析报告</title><style>body{max-width:1000px;margin:45px auto;padding:0 24px;font:14px/1.9 system-ui,sans-serif;color:#294b3b;background:#fafbf7}h1{font-size:30px}h2{margin-top:34px;font-size:19px}p,small{color:#53664f}table{border-collapse:collapse;width:100%;background:white}td,th{padding:11px;text-align:left;border-bottom:1px solid #c6d1c0}th{background:#eef3e6}a{color:#315f45}article{padding:14px 20px;background:white;border:1px solid #e4eadd;border-radius:10px;margin:12px 0}blockquote{margin:10px 0;padding-left:15px;border-left:3px solid #829c68}li{margin:6px 0}</style></head><body><h1>你的收藏，在关注什么？</h1><p>${e(new Date(report.generatedAt).toLocaleString('zh-CN'))} · ${report.summary.total} 条收藏 · ${report.summary.sources} 个来源</p><p>分析范围：${e(report.scope?.folder||'当前收藏')} · ${report.source==='web'?'网页收藏':'书签库'}</p><p>${e(report.basis)}</p><h2>收藏观察</h2>${list(report.insights)}<h2>主题分布</h2>${table(['主题','数量','占比','命中线索'],report.topics.map(t=>[t.name,t.count,`${t.share}%`,t.evidence.join('；')||'暂无匹配']))}<h2>高频关键词</h2>${table(['关键词','涉及收藏数'],report.keywords.map(k=>[k.term,k.count]))}<h2>网站来源</h2>${table(['来源','数量','占比'],report.domains.map(t=>[t.name,t.count,`${t.share}%`]))}<h2>最近十二个月的收藏</h2>${table(['月份','数量'],report.months.map(m=>[m.key,m.count]))}<h2>整理与回顾线索</h2>${list([`待归类 ${report.issues.loose.length} 条；可选择的重复副本 ${report.issues.duplicates.length} 条。`,`收藏超过 180 天 ${report.issues.old.length} 条；有明确记录且 90 天未打开 ${report.issues.stale.length} 条。`,`访问记录未知 ${report.summary.unknownLastUsed} 条，不能据此判断未读。`])}<h2>收藏与命中依据</h2>${report.items.map(item=>{const href=safeOpenUrl(item.url);return `<article><strong>${href?`<a href="${e(href)}" target="_blank" rel="noopener noreferrer">${e(item.title||'未命名书签')}</a>`:e(item.title||'未命名书签')}</strong><p>${e(item.topicName)} · ${e(item.path)}<br>${e(item.evidence.join('；')||'未匹配主题词')}</p>${item.excerpts.map(text=>`<blockquote>${e(text)}</blockquote>`).join('')}${item.note?`<p>笔记：${e(item.note)}</p>`:''}</article>`;}).join('')}<small>报告在本地生成。摘句来自当前收藏已有的摘要或补充文本；主题结果是线索推断，可通过自定义主题修正。</small></body></html>`;
+  return uiHtml`<!doctype html><html lang="${uiLocale()}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>书签小屋 · 分析报告</title><style>body{max-width:1000px;margin:45px auto;padding:0 24px;font:14px/1.9 system-ui,sans-serif;color:#294b3b;background:#fafbf7}h1{font-size:30px}h2{margin-top:34px;font-size:19px}p,small{color:#53664f}table{border-collapse:collapse;width:100%;background:white}td,th{padding:11px;text-align:left;border-bottom:1px solid #c6d1c0}th{background:#eef3e6}a{color:#315f45}article{padding:14px 20px;background:white;border:1px solid #e4eadd;border-radius:10px;margin:12px 0}blockquote{margin:10px 0;padding-left:15px;border-left:3px solid #829c68}li{margin:6px 0}</style></head><body><h1>你的收藏，在关注什么？</h1><p>${e(new Date(report.generatedAt).toLocaleString(uiLocale()))} · ${report.summary.total} 条收藏 · ${report.summary.sources} 个来源</p><p>分析范围：${e(report.scope?.folder||uiText("当前收藏"))} · ${report.source==='web'?uiText("网页收藏"):uiText("书签库")}</p><p>${e(report.basis)}</p><h2>收藏观察</h2>${list(report.insights)}<h2>主题分布</h2>${table([uiText("主题"),uiText("数量"),uiText("占比"),uiText("命中线索")],report.topics.map(t=>[t.name,t.count,`${t.share}%`,t.evidence.join('；')||uiText("暂无匹配")]))}<h2>高频关键词</h2>${table([uiText("关键词"),uiText("涉及收藏数")],report.keywords.map(k=>[k.term,k.count]))}<h2>网站来源</h2>${table([uiText("来源"),uiText("数量"),uiText("占比")],report.domains.map(t=>[t.name,t.count,`${t.share}%`]))}<h2>最近十二个月的收藏</h2>${table([uiText("月份"),uiText("数量")],report.months.map(m=>[m.key,m.count]))}<h2>整理与回顾线索</h2>${list([uiMessage`待归类 ${report.issues.loose.length} 条；可选择的重复副本 ${report.issues.duplicates.length} 条。`,uiMessage`收藏超过 180 天 ${report.issues.old.length} 条；有明确记录且 90 天未打开 ${report.issues.stale.length} 条。`,uiMessage`访问记录未知 ${report.summary.unknownLastUsed} 条，不能据此判断未读。`])}<h2>收藏与命中依据</h2>${report.items.map(item=>{const href=safeOpenUrl(item.url);return `<article><strong>${href?`<a href="${e(href)}" target="_blank" rel="noopener noreferrer">${e(item.title||uiText("未命名书签"))}</a>`:e(item.title||uiText("未命名书签"))}</strong><p>${e(item.topicName)} · ${e(item.path)}<br>${e(item.evidence.join('；')||uiText("未匹配主题词"))}</p>${item.excerpts.map(text=>`<blockquote>${e(text)}</blockquote>`).join('')}${item.note?uiHtml`<p>笔记：${e(item.note)}</p>`:''}</article>`;}).join('')}<small>报告在本地生成。摘句来自当前收藏已有的摘要或补充文本；主题结果是线索推断，可通过自定义主题修正。</small></body></html>`;
+}
+
+export function evidenceText(value){
+  return String(value).split('；').map(part=>{const match=/^(标题|网址路径|文件夹|补充内容)：(.*)$/s.exec(part);return match?uiText(match[1])+': '+match[2]:part;}).join(uiLocale()==='en'?'; ':'；');
+}
+export function localizedAnalysis(report){
+  if(uiLocale()!=='en')return report;
+  return {...report,basis:uiText(report.basis),
+    topics:report.topics.map(topic=>({...topic,name:topic.custom?topic.name:uiText(topic.name),evidence:topic.evidence.map(evidenceText)})),
+    items:report.items.map(item=>({...item,topicName:item.topicId.startsWith('custom:')?item.topicName:uiText(item.topicName),evidence:item.evidence.map(evidenceText)})),
+    months:report.months.map(month=>({...month,label:uiDate(month.key+'-01T12:00:00',{month:'short'})}))};
 }

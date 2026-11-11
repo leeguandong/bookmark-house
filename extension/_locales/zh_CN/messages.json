@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "书签小屋 · 网页收藏与书签管理"
+  },
+  "extensionDescription": {
+    "message": "通过工具栏、右键、快捷键或拖拽保存网页卡片，按日期整理、备注和星标；支持浏览器书签管理、分析、撤销与本地备份。"
+  },
+  "actionTitle": {
+    "message": "保存网页 · 书签小屋"
+  },
+  "commandDescription": {
+    "message": "保存当前网页到书签小屋"
+  }
+}

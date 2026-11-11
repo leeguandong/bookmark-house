@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "书签小屋 · 网页收藏与书签管理",
-  "version": "2.4.7",
-  "description": "通过工具栏、右键、快捷键或拖拽保存网页卡片，按日期整理、备注和星标；支持浏览器书签管理、分析、撤销与本地备份。",
+  "name": "__MSG_extensionName__",
+  "version": "2.5.0",
+  "description": "__MSG_extensionDescription__",
   "minimum_chrome_version": "109",
   "permissions": [
     "bookmarks",
@@ -11,7 +11,7 @@
     "scripting"
   ],
   "action": {
-    "default_title": "保存网页 · 书签小屋",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/16.png",
       "32": "icons/32.png"
@@ -38,11 +38,12 @@
         "default": "Alt+Shift+S",
         "mac": "Command+Shift+S"
       },
-      "description": "保存当前网页到书签小屋"
+      "description": "__MSG_commandDescription__"
     }
   },
   "optional_host_permissions": [
     "http://*/*",
     "https://*/*"
-  ]
+  ],
+  "default_locale": "en"
 }

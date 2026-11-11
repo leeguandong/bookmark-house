@@ -1,3 +1,4 @@
+import {t as uiText} from './i18n.js';
 import {flatten,findDuplicates} from './core.js';
 import {privateTrashRoot} from './private-trash.js';
 
@@ -104,7 +105,7 @@ export class BookmarkCache {
       this.mustRead=storageFailed;
       return {snapshot,fromCache:false};
     }
-    throw new Error('书签正在变化，请稍后再试。');
+    throw new Error(uiText("书签正在变化，请稍后再试。"));
   }
 }
 

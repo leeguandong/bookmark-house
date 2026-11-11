@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
+function chinesePopup(...args){const page=new JSDOM(...args);Object.defineProperty(page.window.navigator,'language',{value:'zh-CN',configurable:true});return page;}
 const root=new URL('../extension/',import.meta.url);
 const [html,boot,css]=await Promise.all(['popup.html','popup-boot.js','popup.css'].map(name=>readFile(new URL(name,root))));
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -10,7 +11,7 @@ const release=JSON.parse(await readFile(new URL('manifest.json',root),'utf8')).v
 
 test('popup shell reaches load and opens the manager without controller, storage, or webpage APIs',async()=>{
   const opened=[];let loadComplete=false,closed=0;
-  const page=new JSDOM(html.toString(),{url:'https://synthetic-popup.test/popup.html',runScripts:'outside-only'});
+  const page=chinesePopup(html.toString(),{url:'https://synthetic-popup.test/popup.html',runScripts:'outside-only'});
   const initialAssets=[...page.window.document.querySelectorAll('script[src],link[rel="stylesheet"]')].map(node=>node.getAttribute('src')||node.getAttribute('href'));
   page.window.addEventListener('load',()=>{loadComplete=true;});
   page.window.open=(url,target,features)=>opened.push({url,target,features});page.window.close=()=>closed++;
@@ -32,7 +33,7 @@ test('popup shell reaches load and opens the manager without controller, storage
 });
 
 test('controller failure retains the working collection shortcut and provides an explanation',async()=>{
-  const page=new JSDOM(html.toString(),{url:'https://synthetic-popup.test/popup.html',runScripts:'outside-only'});
+  const page=chinesePopup(html.toString(),{url:'https://synthetic-popup.test/popup.html',runScripts:'outside-only'});
   try{
     page.window.eval(boot.toString());page.window.dispatchEvent(new page.window.Event('load'));
     for(let i=0;i<50&&!page.window.document.querySelector('script[type="module"]');i++)await wait(5);

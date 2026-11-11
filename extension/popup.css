@@ -7,3 +7,13 @@ header{padding:18px 23px}main{padding:18px 23px}.current-page{padding:14px 17px;
 footer{display:flex;align-items:center;justify-content:space-between;gap:12px}.popup-version{font-size:9px;white-space:nowrap;width:auto;min-height:22px;border:0;background:transparent;color:var(--muted);padding:0 2px;cursor:help}.popup-version:hover{color:var(--accent)}.popup-startup-info{font-size:10px;line-height:1.8;color:var(--muted);margin:0 23px 18px}
 
 .privacy-note{font-size:11px;text-align:center;margin:24px 0 0}.privacy-note a,footer a{color:var(--muted);text-underline-offset:3px}footer a:hover,.privacy-note a:hover{color:var(--accent)}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+header .popup-local{display:none}header .language-control{margin-left:auto;flex-shrink:0}
+.language-control{display:inline-flex;align-items:center;margin:0}
+.language-control select{width:94px;padding:6px 7px;border:1px solid #48534a;border-radius:7px;background:#232a25;color:#e2e7e1;font:inherit;font-size:11px}
+.language-control select:focus-visible{outline:2px solid #a8c69e;outline-offset:2px}
+html:lang(en) header h1{font-size:18px}html:lang(en) header p{max-width:145px;font-size:11px}html:lang(en) footer{gap:10px;align-items:flex-start}html:lang(en) footer>span{max-width:260px;line-height:1.5}
+
+/* Translation markers retain the layout and typography of the original text node. */
+.i18n-inline{display:contents!important;color:inherit!important;font:inherit!important;float:none!important;white-space:inherit!important}

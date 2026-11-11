@@ -1,16 +1,18 @@
+import {msg as uiMessage,locale as uiLocale,initLocale} from './i18n.js';
 import {LocalStore} from './local-store.js';
 import {HOME_CACHE_KEY,validHomeCache,rememberHomePreview,prepareHomePreview} from './home-cache.js';
 import {renderWebCollection} from './web-collection-render.js';
 import {cleanPreview} from './preview-data.js';
 import {ensureSidebarLayout} from './sidebar-layout.js';
 
+initLocale();
 const panel=document.querySelector('#webPanel');
 ensureSidebarLayout({document,window});
 async function showCachedHome(){
   const store=new LocalStore(location.protocol==='chrome-extension:'?'bookmark-house':'bookmark-house-demo');
   try{
     const snapshot=await store.get(HOME_CACHE_KEY);if(!validHomeCache(snapshot))return;
-    panel.innerHTML=renderWebCollection(snapshot,{summary:snapshot.summary,limit:snapshot.items.length||24});
+    panel.dataset.renderLocale=uiLocale();panel.innerHTML=renderWebCollection(snapshot,{summary:snapshot.summary,limit:snapshot.items.length||24});
     // Cached links and layout controls work immediately. Data-changing controls
     // become available only after the authoritative collection has been read.
     panel.setAttribute('aria-busy','true');
@@ -33,5 +35,5 @@ async function showCachedHome(){
 const preview=showCachedHome();prepareHomePreview(preview);
 // Load the manager module graph while IndexedDB reads the cached first page.
 export const startup=import('./manager.js').catch(error=>{
-  document.body.inert=false;document.querySelector('#status').textContent=`小屋暂时无法打开，请刷新后重试。${error.message}`;
+  document.body.inert=false;document.querySelector('#status').textContent=uiMessage`小屋暂时无法打开，请刷新后重试。${error.message}`;
 });

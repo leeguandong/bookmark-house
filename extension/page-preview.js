@@ -1,3 +1,4 @@
+import {t as uiText,msg as uiMessage} from './i18n.js';
 import {cleanPreview} from './preview-data.js';
 export {cleanPreview} from './preview-data.js';
 import {summarizePage} from './page-summary.js';
@@ -98,32 +99,32 @@ export async function thumbnail(blob){
 
 const originPattern=url=>{const u=new URL(url);return `${u.protocol}//${u.hostname}/*`;};
 async function limitedBlob(response,max){
-  if(!response.ok)throw new Error(`网页暂时无法读取（${response.status}）。`);
-  if(Number(response.headers.get('content-length'))>max)throw new Error('网页内容太大，请用工具栏保存当前页面。');
-  const reader=response.body?.getReader();if(!reader)throw new Error('无法读取网页响应。');
+  if(!response.ok)throw new Error(uiMessage`网页暂时无法读取（${response.status}）。`);
+  if(Number(response.headers.get('content-length'))>max)throw new Error(uiText("网页内容太大，请用工具栏保存当前页面。"));
+  const reader=response.body?.getReader();if(!reader)throw new Error(uiText("无法读取网页响应。"));
   const chunks=[];let length=0;
-  try{while(true){const {done,value}=await reader.read();if(done)break;length+=value.byteLength;if(length>max){await reader.cancel();throw new Error('网页内容太大，请用工具栏保存当前页面。');}chunks.push(value);}}finally{reader.releaseLock();}
+  try{while(true){const {done,value}=await reader.read();if(done)break;length+=value.byteLength;if(length>max){await reader.cancel();throw new Error(uiText("网页内容太大，请用工具栏保存当前页面。"));}chunks.push(value);}}finally{reader.releaseLock();}
   return new Blob(chunks,{type:(response.headers.get('content-type')||'').split(';')[0]});
 }
 export function requestPreviewAccess(url,permissions=globalThis.chrome?.permissions){
-  if(!permissions)throw new Error('请在已安装的 Chrome 扩展中使用补全内容。');
+  if(!permissions)throw new Error(uiText("请在已安装的 Chrome 扩展中使用补全内容。"));
   // Invoke directly during the click, before any storage or network await.
   return permissions.request({origins:[...new Set((Array.isArray(url)?url:[url]).map(originPattern))]});
 }
 export async function loadPagePreview(url,{permissions=globalThis.chrome?.permissions,request=globalThis.fetch}={}){
-  const page=new URL(url);if(!['http:','https:'].includes(page.protocol))throw new Error('只能读取普通网页。');
+  const page=new URL(url);if(!['http:','https:'].includes(page.protocol))throw new Error(uiText("只能读取普通网页。"));
   if(!permissions||!await permissions.contains({origins:[originPattern(url)]}))return null;
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
   try{
     const options={credentials:'omit',referrerPolicy:'no-referrer',redirect:'error',signal:controller.signal};
     const response=await request(url,options),type=response.headers.get('content-type')||'';
-    if(!/text\/html|application\/xhtml\+xml/i.test(type))throw new Error('此链接没有可读取的网页简介，请在编辑中补充。');
+    if(!/text\/html|application\/xhtml\+xml/i.test(type))throw new Error(uiText("此链接没有可读取的网页简介，请在编辑中补充。"));
     const blob=await limitedBlob(response,2000000),html=new TextDecoder(/charset\s*=\s*([\w-]+)/i.exec(type)?.[1]||'utf-8').decode(await blob.arrayBuffer()),details=parsePagePreview(html,url);
     let cover='';
     // Only the granted origin may supply a cover; third-party image servers are not contacted.
     if(details.imageUrl&&new URL(details.imageUrl).origin===page.origin){try{cover=await thumbnail(await limitedBlob(await request(details.imageUrl,options),2000000));}catch{}}
-    if(!details.title&&!details.description&&!cover)throw new Error('网页没有提供简介。可打开原网页，用工具栏保存，或手动填写简介。');
+    if(!details.title&&!details.description&&!cover)throw new Error(uiText("网页没有提供简介。可打开原网页，用工具栏保存，或手动填写简介。"));
     return {title:details.title,...cleanPreview({...details,cover,capturedAt:Date.now()})};
-  }catch(error){if(error.name==='AbortError')throw new Error('读取超时，链接已保留，请稍后重试。');if(error instanceof TypeError)throw new Error('网站拒绝读取或发生跳转。可打开原网页，用工具栏保存内容。');throw error;}
+  }catch(error){if(error.name==='AbortError')throw new Error(uiText("读取超时，链接已保留，请稍后重试。"));if(error instanceof TypeError)throw new Error(uiText("网站拒绝读取或发生跳转。可打开原网页，用工具栏保存内容。"));throw error;}
   finally{clearTimeout(timer);}
 }

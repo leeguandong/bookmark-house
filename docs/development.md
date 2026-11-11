@@ -21,7 +21,7 @@ npm run check
 | `npm run audit:secrets` | 两套本地规则检查已跟踪文件 |
 | `npm run audit:staged` | 两套本地规则检查 Git 暂存内容 |
 | `npm run check` | 资源检查、测试和敏感信息扫描 |
-| `npm run package` | 生成 `dist/bookmark-house-2.4.7.zip` 与报告 |
+| `npm run package` | 生成 `dist/bookmark-house-2.5.0.zip` 与报告 |
 
 Windows 若只提供 `py` 命令，可直接使用 `py -3` 执行 `scripts/` 下相应 Python 脚本，或将 Python 安装目录加入 PATH。
 

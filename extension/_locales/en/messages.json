@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "Bookmark House · Web Collections & Bookmarks"
+  },
+  "extensionDescription": {
+    "message": "Save webpages as dated cards with notes and excerpts. Organize bookmarks with local analysis, undo, Trash and backups."
+  },
+  "actionTitle": {
+    "message": "Save webpage · Bookmark House"
+  },
+  "commandDescription": {
+    "message": "Save the current webpage to Bookmark House"
+  }
+}

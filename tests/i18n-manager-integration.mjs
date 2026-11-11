@@ -1,0 +1,53 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {JSDOM} from 'jsdom';
+import {IDBFactory} from 'fake-indexeddb';
+import {setLanguage,LANGUAGE_KEY} from '../extension/i18n.js';
+import {LocalStore,demoTree} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
+
+test('the manager switches full views live and preserves saved content, query, selection and folder names',async()=>{
+  setLanguage('en',{persist:false});
+  const markup=await readFile(new URL('../extension/manager.html',import.meta.url),'utf8');
+  const page=new JSDOM(markup,{url:'https://synthetic-i18n.test/manager.html',pretendToBeVisual:true});
+  Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});
+  Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
+  Object.defineProperty(globalThis,'localStorage',{value:page.window.localStorage,configurable:true});
+  globalThis.BroadcastChannel=class{postMessage(){}close(){}};
+  const nativeTimer=setTimeout,timers=[];
+  globalThis.setTimeout=(fn,delay,...args)=>{const timer=nativeTimer(fn,delay,...args);timer.unref();timers.push(timer);return timer;};
+  globalThis.requestAnimationFrame=fn=>setTimeout(fn,16);globalThis.cancelAnimationFrame=clearTimeout;
+  page.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};
+  page.window.HTMLDialogElement.prototype.close=function(){this.open=false;this.dispatchEvent(new page.window.Event('close'));};
+  const store=new LocalStore('bookmark-house-demo'),tree=demoTree();
+  tree[0].children[0].children.push({id:'custom-chinese-folder',title:'保存网页',children:[]});
+  await store.set('demoTree',tree);
+  const repository=new WebCollection(store),saved=await repository.add([{url:'https://saved.test/article',title:'保存网页',note:'我的备注不能被翻译',preview:{summary:'保留这段中文原文摘要'}}]);
+  const $=selector=>document.querySelector(selector);
+  const wait=ms=>new Promise(resolve=>nativeTimer(resolve,ms));
+  const until=async(condition,label)=>{for(let i=0;i<220;i++){if(condition())return;await wait(10);}throw new Error(label+': '+$('#status').textContent);};
+  const switchLanguage=value=>{const control=$('[data-language-select]');control.value=value;control.dispatchEvent(new page.window.Event('change',{bubbles:true}));};
+  const englishControls=container=>{for(const button of container.querySelectorAll('button:not([data-analysis-type=keyword]):not([data-analysis-type=folder]):not([data-analysis-key^=\"custom:\"])'))assert.ok(!/[\u3400-\u9fff]/.test(button.textContent),'Untranslated button: '+button.textContent);};
+  try{
+    await import(`../extension/manager.js?english-integration=${Date.now()}`);
+    await until(()=>$('#webPanel .web-card')&&$('#navAll').textContent==='19','manager ready');
+    assert.equal(document.documentElement.lang,'en');assert.equal($('#pageTitle').textContent,'Web collection');
+    assert.equal($('#webPanel .web-card-title').textContent,'保存网页');assert.ok($('#webPanel').textContent.includes('我的备注不能被翻译'));
+    assert.equal($('#folders [data-folder="custom-chinese-folder"] .folder-name').textContent,'保存网页');
+    assert.match($('#webPanel .web-day-count').textContent,/1 page$/);englishControls($('#webPanel'));
+    $('#webPanel [data-web-select]').click();$('#search').value='保存网页';$('#search').dispatchEvent(new page.window.Event('input',{bubbles:true}));await wait(200);
+    switchLanguage('zh-CN');assert.equal($('#pageTitle').textContent,'网页收藏');assert.equal($('#search').value,'保存网页');assert.equal($('#webPanel [data-web-select]').checked,true);
+    switchLanguage('en');assert.equal($('[data-web-nav=all]').getAttribute('aria-label'),'Web collection');assert.equal($('#pageTitle').textContent,'Web collection');assert.equal($('#search').value,'保存网页');assert.equal($('#webPanel [data-web-select]').checked,true);assert.equal(localStorage.getItem(LANGUAGE_KEY),'en');
+    assert.equal($('#webPanel .web-card-title').textContent,'保存网页');englishControls($('#webPanel'));
+    $('#search').value='';$('#search').dispatchEvent(new page.window.Event('input',{bubbles:true}));await wait(200);
+    $('[data-view="analysis"]').click();englishControls($('#analysisPanel'));assert.match($('#analysisPanel').textContent,/Topics/);
+    $('[data-tool-source="bookmarks"]').click();englishControls($('#analysisPanel'));assert.match($('#analysisPanel').textContent,/Development and technology/);
+    $('[data-view="organize"]').click();englishControls($('#organizerPanel'));assert.match($('#organizerPanel').textContent,/Organization preferences/);
+    $('[data-action="generateOrganization"]').click();await until(()=>$('#toastMessage').textContent.startsWith('Generated '),'plan generated and saved');englishControls($('#organizerPanel'));
+    $('[data-view="backup"]').click();englishControls($('#backupPanel'));assert.match($('#backupPanel').textContent,/Export web collection/);
+    $('[data-view="trash"]').click();englishControls($('#toolSourceBar'));
+    const original=(await repository.read()).items.find(item=>item.id===saved.ids[0]);assert.equal(original.title,'保存网页');assert.equal(original.note,'我的备注不能被翻译');
+    assert.equal((await store.get('demoTree'))[0].children[0].children.find(item=>item.id==='custom-chinese-folder').title,'保存网页');
+  }finally{for(const timer of timers)clearTimeout(timer);globalThis.setTimeout=nativeTimer;page.window.close();}
+});

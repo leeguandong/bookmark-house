@@ -1,3 +1,5 @@
+import {onLanguageChange} from './i18n.js';
+import {t as uiText,msg as uiMessage,html as uiHtml,locale as uiLocale,date as uiDate,number as uiNumber} from './i18n.js';
 const STORAGE_KEY='bookmark-house.sidebar-layout.v1';
 const DEFAULT_WIDTH=244,MIN_WIDTH=220,MAX_WIDTH=480,RAIL_WIDTH=72,MOBILE_BREAKPOINT=760;
 const layouts=new WeakMap();
@@ -24,20 +26,25 @@ export function installSidebarLayout({document,window}){
   }catch{/* Storage may be disabled; layout controls still work. */}
   function save(){try{window.localStorage.setItem(STORAGE_KEY,JSON.stringify({width,collapsed}));}catch{}}
   function apply(){
+  for(const button of sidebar.querySelectorAll('.sidebar-primary .nav-item,.sidebar-tools .nav-item')){
+    const label=button.querySelector('span')?.textContent||'';
+    button.setAttribute('aria-label',label);button.title=label;
+  }
+
     const small=mobile(),rail=!small&&collapsed,effective=rail?RAIL_WIDTH:clamp(width);
     body.classList.toggle('sidebar-collapsed',rail);
     body.style.setProperty('--sidebar-width',`${effective}px`);
     body.style.setProperty('--sidebar-half',`${small?0:effective/2}px`);
     const expanded=small?body.classList.contains('sidebar-open'):!collapsed;
-    const label=expanded?'收起侧边栏':'展开侧边栏';
+    const label=expanded?uiText("收起侧边栏"):uiText("展开侧边栏");
     toggle.setAttribute('aria-expanded',String(expanded));
     toggle.setAttribute('aria-label',label);toggle.title=label;
     sidebar.inert=small&&!expanded;
     handle.hidden=small||rail;
     handle.setAttribute('aria-valuemax',String(maxWidth()));
     handle.setAttribute('aria-valuenow',String(clamp(width)));
-    handle.setAttribute('aria-valuetext',`${clamp(width)} 像素`);
-    section.querySelector('summary').title=rail?'展开书签库':'书签库';
+    handle.setAttribute('aria-valuetext',uiMessage`${clamp(width)} 像素`);
+    section.querySelector('summary').title=rail?uiText("展开书签库"):uiText("书签库");
   }
   function closeMobile(){body.classList.remove('sidebar-open');apply();}
   function expand(){collapsed=false;if(mobile())body.classList.add('sidebar-open');apply();save();}
@@ -48,10 +55,6 @@ export function installSidebarLayout({document,window}){
     body.classList.remove('sidebar-resizing');
     if(handle.hasPointerCapture?.(previous.id))handle.releasePointerCapture(previous.id);
     apply();if(commit)save();
-  }
-  for(const button of sidebar.querySelectorAll('.sidebar-primary .nav-item,.sidebar-tools .nav-item')){
-    const label=button.querySelector('span')?.textContent||'';
-    button.setAttribute('aria-label',label);button.title=label;
   }
   listen(toggle,'click',()=>{
     if(mobile())body.classList.toggle('sidebar-open');else{collapsed=!collapsed;save();}
@@ -91,6 +94,7 @@ export function installSidebarLayout({document,window}){
     }
   },true);
   listen(window,'resize',()=>{finish(false);if(!mobile())body.classList.remove('sidebar-open');apply();});
+  listeners.push(onLanguageChange(apply));
   apply();
   return {expand,closeMobile,destroy(){finish(false);listeners.forEach(remove=>remove());}};
 }

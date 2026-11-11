@@ -4,6 +4,7 @@
 
 <h1 align="center">书签小屋 · Bookmark House</h1>
 <p align="center">留住好内容，随时回来看看。</p>
+<p align="center"><strong>简体中文</strong> · <a href="README.en.md">English</a></p>
 <p align="center">
   <a href="https://github.com/leeguandong/bookmark-house/actions/workflows/ci.yml"><img src="https://github.com/leeguandong/bookmark-house/actions/workflows/ci.yml/badge.svg" alt="项目检查"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-326d58" alt="MIT License"></a>
@@ -31,7 +32,7 @@
 
 ## 快速开始
 
-当前源码版本为 **2.4.7**。支持 Chrome 109 及以上，无需构建即可加载。
+当前源码版本为 **2.5.0**。支持 Chrome 109 及以上，无需构建即可加载。
 
 1. [下载源码 ZIP](https://github.com/leeguandong/bookmark-house/archive/refs/heads/main.zip) 并解压，或克隆本仓库。
 2. 在 Chrome 打开 `chrome://extensions`，开启“开发者模式”。
@@ -42,6 +43,10 @@
 Windows / Linux 默认快捷键为 `Alt+Shift+S`，macOS 为 `Command+Shift+S`，可在 `chrome://extensions/shortcuts` 调整。
 
 已有安装请先导出重要收藏，并保留原扩展。商店安装版与源码加载版可能使用不同的扩展 ID，数据不会自动互通。详见[安装与数据迁移](docs/getting-started.md)。
+
+## 中英文界面
+
+首次打开跟随浏览器语言；在管理页右上角或保存弹窗中选择 **简体中文 / English**，即可切换并记住选择。导航、卡片操作、分析、整理、备份、提示信息、日期和右键入口均支持两种语言。切换不会翻译或修改你的收藏标题、正文、备注、自定义主题与文件夹名称。
 
 ## 保存与内容提取
 

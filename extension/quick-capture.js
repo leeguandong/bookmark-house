@@ -1,3 +1,4 @@
+import {t as uiText} from './i18n.js';
 import {webUrl} from './web-address.js';
 import {readDocumentPreview,cleanPreview,thumbnail} from './page-preview.js';
 import {readSavedPage} from './auto-preview.js';
@@ -36,7 +37,7 @@ export function contextCapture(info={},tab={}){
 }
 export async function captureActivePage(repository,tabs){
   const [tab]=await tabs.query({active:true,currentWindow:true});
-  if(!tab?.url)throw new Error('当前页面无法直接收藏，请在普通网页中使用。');
+  if(!tab?.url)throw new Error(uiText("当前页面无法直接收藏，请在普通网页中使用。"));
   const details=await capturePageDetails(tab),result=await repository.add([details]);
   return {tabId:tab.id,result};
 }

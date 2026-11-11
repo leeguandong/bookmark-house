@@ -1,3 +1,5 @@
+import {englishText} from './i18n.js';
+import {t as uiText,msg as uiMessage,html as uiHtml,locale as uiLocale,date as uiDate,number as uiNumber} from './i18n.js';
 import {normalizedUrl,findDuplicates,escapeHtml} from './display-utils.js';
 export {normalizedUrl,findDuplicates,escapeHtml} from './display-utils.js';
 import {normalizeMeta,trashTree,privateNotes,archivePlan,executeArchive,executeRestore,undoArchive,undoRestore,migratePrivateTrash,privatePreview,emptyPrivateTrash,restoreDestination,resolveId} from './private-trash.js';
@@ -70,7 +72,12 @@ export function exportHtml(tree) {
     const inner = (node.children || []).map(render).join('');
     return node.parentId === undefined ? inner : `<DT><H3>${escapeHtml(node.title)}</H3>\n<DL><p>\n${inner}</DL><p>\n`;
   }
-  return '<!DOCTYPE NETSCAPE-Bookmark-file-1>\n<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">\n<TITLE>书签小屋备份</TITLE>\n<H1>书签备份</H1>\n<DL><p>\n' + tree.map(render).join('') + '</DL><p>\n';
+  return uiHtml`<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>书签小屋备份</TITLE>
+<H1>书签备份</H1>
+<DL><p>
+` + tree.map(render).join('') + '</DL><p>\n';
 }
 
 export class BookmarkEngine {
@@ -85,7 +92,7 @@ export class BookmarkEngine {
     for(const entry of meta.privateTrash){
       if(id===entry.id||id.startsWith(entry.id+':')){const source=id===entry.id?entry.tree.id:id.slice(entry.id.length+1);entry.notes||={};entry.notes[source]=note;await this.store.set('meta',meta);return;}
     }
-    throw new Error('回收站项目已经变化。');
+    throw new Error(uiText("回收站项目已经变化。"));
   }
   async getTrashPreview() { return privatePreview(await this.meta()); }
   async recoverTrashPurge() {
@@ -112,8 +119,8 @@ export class BookmarkEngine {
     const home = model.nodes.get(meta.homeId);
     if (!home || home.url !== undefined || home.managed || home.inTrash || home.depth === 0) {
       const root = this.bookmarksBar(model)||this.primaryRoot(model);
-      if (!root) throw new Error('没有可写入的书签文件夹。');
-      const node = await this.api.create({parentId:root.id,title:'书签小屋'});
+      if (!root) throw new Error(uiText("没有可写入的书签文件夹。"));
+      const node = await this.api.create({parentId:root.id,title:uiText('书签小屋')});
       meta.homeId = node.id;
       await this.store.set('meta', meta);
     }
@@ -121,19 +128,19 @@ export class BookmarkEngine {
   }
   validateFolder(model,id,meta,{inTrash=false}={}) {
     const folder=model.nodes.get(id);
-    if(!folder||folder.url!==undefined)throw new Error('文件夹已变化，请刷新后再试。');
-    if(folder.depth<=1||folder.folderType)throw new Error('Chrome 自带的文件夹不能删除。');
+    if(!folder||folder.url!==undefined)throw new Error(uiText("文件夹已变化，请刷新后再试。"));
+    if(folder.depth<=1||folder.folderType)throw new Error(uiText("Chrome 自带的文件夹不能删除。"));
     const contents=folderContents(model,id),nodes=contents.ids.map(childId=>model.nodes.get(childId));
-    if(nodes.some(n=>n.managed||n.unmodifiable))throw new Error('该文件夹包含受管理的内容，无法删除或还原。');
-    if(contents.ids.includes(meta.homeId)||contents.ids.includes(meta.trashId))throw new Error('书签小屋及其回收站所在的文件夹需要保留。');
-    if(folder.inTrash!==inTrash)throw new Error(inTrash?'该文件夹不在回收站中。':'该文件夹已在回收站中。');
+    if(nodes.some(n=>n.managed||n.unmodifiable))throw new Error(uiText("该文件夹包含受管理的内容，无法删除或还原。"));
+    if(contents.ids.includes(meta.homeId)||contents.ids.includes(meta.trashId))throw new Error(uiText("书签小屋及其回收站所在的文件夹需要保留。"));
+    if(folder.inTrash!==inTrash)throw new Error(inTrash?uiText("该文件夹不在回收站中。"):uiText("该文件夹已在回收站中。"));
     return folder;
   }
   validateBookmark(model, id) {
     const b = model.nodes.get(id);
-    if (!b || b.url === undefined) throw new Error('书签已变化，请刷新后再试。');
-    if (b.managed) throw new Error('受管理的书签无法修改。');
-    if (b.inTrash) throw new Error('请先还原回收站中的书签，再进行修改。');
+    if (!b || b.url === undefined) throw new Error(uiText("书签已变化，请刷新后再试。"));
+    if (b.managed) throw new Error(uiText("受管理的书签无法修改。"));
+    if (b.inTrash) throw new Error(uiText("请先还原回收站中的书签，再进行修改。"));
     return b;
   }
   movePlan(b, destination) { return {kind:'move',id:b.id,before:{parentId:b.parentId,index:b.index},after:destination}; }
@@ -144,8 +151,8 @@ export class BookmarkEngine {
   async run(label, planner) {
     const meta = await this.meta();
     meta.history ||= []; meta.originals ||= {};
-    if (meta.pending) throw new Error('上次操作未完成，请先点击“撤销上次操作”。');
-    if(meta.purgePending)throw new Error('上次清空尚未完成，请重新打开小屋以核对清空结果。');
+    if (meta.pending) throw new Error(uiText("上次操作未完成，请先点击“撤销上次操作”。"));
+    if(meta.purgePending)throw new Error(uiText("上次清空尚未完成，请重新打开小屋以核对清空结果。"));
     const tree = trashTree(await this.api.getTree(),meta), model = flatten(tree, meta.trashId);
     await this.store.set('backup', {tree, date:Date.now()});
     const plans = await planner(model, meta);
@@ -168,10 +175,10 @@ export class BookmarkEngine {
           continue;
         }
         const [current] = await this.api.get(p.id);
-        if (!current || (p.kind === 'move' ? current.parentId !== p.before.parentId : current.title !== p.before.title || current.url !== p.before.url)) throw new Error('书签在整理期间被其他页面修改。');
+        if (!current || (p.kind === 'move' ? current.parentId !== p.before.parentId : current.title !== p.before.title || current.url !== p.before.url)) throw new Error(uiText("书签在整理期间被其他页面修改。"));
         if (p.kind === 'move') {
           const destination={...p.after};
-          if(p.targetRef&&!destination.parentId)throw new Error('分类文件夹尚未建立。');
+          if(p.targetRef&&!destination.parentId)throw new Error(uiText("分类文件夹尚未建立。"));
           if(Number.isInteger(destination.index)||p.restoreAnchors){
             const children=await this.api.getChildren(destination.parentId),next=children.findIndex(n=>n.id===p.restoreAnchors?.nextId),previous=children.findIndex(n=>n.id===p.restoreAnchors?.previousId);
             destination.index=next>=0?next:previous>=0?previous+1:Math.min(Math.max(0,destination.index??children.length),children.length);
@@ -187,23 +194,23 @@ export class BookmarkEngine {
       await this.store.set('meta',meta);
       return plans.length;
     } catch (error) {
-      throw new Error(`${error.message} 已保留恢复记录，请点击“撤销上次操作”恢复。`);
+      throw new Error(uiMessage`${error.message} 已保留恢复记录，请点击“撤销上次操作”恢复。`);
     }
   }
   async move(ids, parentId) {
     return this.run('移动书签', async model => {
       const parent = model.nodes.get(parentId);
-      if (!parent || parent.url !== undefined || parent.depth === 0 || parent.managed || parent.inTrash) throw new Error('请选择可写入的目标文件夹。');
+      if (!parent || parent.url !== undefined || parent.depth === 0 || parent.managed || parent.inTrash) throw new Error(uiText("请选择可写入的目标文件夹。"));
       return [...new Set(ids)].map(id => this.validateBookmark(model,id)).filter(b => b.parentId !== parentId).map(b => this.movePlan(b,{parentId}));
     });
   }
   async addBookmarks(links,parentId){
     return this.run('拖入网页链接',async model=>{
       const parent=model.nodes.get(parentId);
-      if(!parent||parent.url!==undefined||parent.depth===0||parent.managed||parent.inTrash)throw new Error('请选择可写入的目标文件夹。');
-      if(!Array.isArray(links)||!links.length||links.length>50)throw new Error('每次可拖入 1–50 个网页链接。');
+      if(!parent||parent.url!==undefined||parent.depth===0||parent.managed||parent.inTrash)throw new Error(uiText("请选择可写入的目标文件夹。"));
+      if(!Array.isArray(links)||!links.length||links.length>50)throw new Error(uiText("每次可拖入 1–50 个网页链接。"));
       const seen=new Set((parent.children||[]).filter(n=>n.url!==undefined).map(n=>normalizedUrl(n.url))),plans=[];
-      for(const link of links){let url;try{url=new URL(link.url);}catch{throw new Error('网页链接无效。');}if(!['http:','https:'].includes(url.protocol))throw new Error('这里只接收 http 或 https 网页链接。');
+      for(const link of links){let url;try{url=new URL(link.url);}catch{throw new Error(uiText("网页链接无效。"));}if(!['http:','https:'].includes(url.protocol))throw new Error(uiText("这里只接收 http 或 https 网页链接。"));
         if(seen.has(url.href))continue;seen.add(url.href);
         plans.push({kind:'create',ref:`new-bookmark:${plans.length}`,id:null,before:{},after:{parentId,title:String(link.title||url.href).trim().slice(0,500)||url.href,url:url.href}});
       }
@@ -217,7 +224,7 @@ export class BookmarkEngine {
       const homeId = await this.ensureHome(meta,model);
       const children = await this.api.getChildren(homeId), targets = new Map();
       for (const category of new Set(items.map(suggestCategory))) {
-        const folder = children.find(f => f.url === undefined && f.title === category && !f.unmodifiable) || await this.api.create({parentId:homeId,title:category});
+        const folder = children.find(f => f.url === undefined && [category,englishText(category)].includes(f.title) && !f.unmodifiable) || await this.api.create({parentId:homeId,title:uiText(category)});
         targets.set(category,folder.id);
       }
       return items.filter(b => b.parentId !== targets.get(suggestCategory(b))).map(b => this.movePlan(b,{parentId:targets.get(suggestCategory(b))}));
@@ -231,18 +238,18 @@ export class BookmarkEngine {
   }
   async applyOrganization(plan,keys) {
     return this.run('自动整理',async(model,meta)=>{
-      if(treeSignature(model)!==plan.signature||meta.homeId!==plan.homeId||meta.trashId!==plan.trashId)throw new Error('书签库已变化，请重新生成整理方案后再执行。');
+      if(treeSignature(model)!==plan.signature||meta.homeId!==plan.homeId||meta.trashId!==plan.trashId)throw new Error(uiText("书签库已变化，请重新生成整理方案后再执行。"));
       const selected=new Set(keys),steps=plan.steps.filter(s=>selected.has(s.key));
-      if(!steps.length)throw new Error('请至少选择一项整理操作。');
+      if(!steps.length)throw new Error(uiText("请至少选择一项整理操作。"));
       const target=model.nodes.get(plan.settings.targetId);
-      if(!target||target.managed||target.inTrash||target.url!==undefined||target.depth===0)throw new Error('分类位置不可写入。');
+      if(!target||target.managed||target.inTrash||target.url!==undefined||target.depth===0)throw new Error(uiText("分类位置不可写入。"));
       const archives=steps.flatMap(s=>s.archiveIds),plans=[],created=new Set();
       // Validate the complete selection before any folder is created or moved.
       for(const step of steps){
         const n=model.nodes.get(step.id);
         if(n?.url===undefined)this.validateFolder(model,step.id,meta);else this.validateBookmark(model,step.id);
-        for(const move of step.moves){const child=model.nodes.get(move.id);if(!child||child.managed)throw new Error('目录内容已变化。');}
-        if(step.targetId){const dest=model.nodes.get(step.targetId);if(!dest||dest.managed||dest.inTrash||archives.includes(dest.id))throw new Error('目标文件夹不可用。');}
+        for(const move of step.moves){const child=model.nodes.get(move.id);if(!child||child.managed)throw new Error(uiText("目录内容已变化。"));}
+        if(step.targetId){const dest=model.nodes.get(step.targetId);if(!dest||dest.managed||dest.inTrash||archives.includes(dest.id))throw new Error(uiText("目标文件夹不可用。"));}
       }
       for(const step of steps){
         if(step.type==='classify'){
@@ -260,8 +267,8 @@ export class BookmarkEngine {
     return this.run('还原回收站项目',async(model,meta)=>{
       return [...new Set(ids)].map(id=>{
         const entry=meta.privateTrash.find(item=>item.id===id);
-        if(!entry)throw new Error('请还原整个所属文件夹，以保留原有层级。');
-        if(!model.nodes.get(id)?.inTrash)throw new Error('该项目仍在 Chrome 中，请先撤销未完成的操作。');
+        if(!entry)throw new Error(uiText("请还原整个所属文件夹，以保留原有层级。"));
+        if(!model.nodes.get(id)?.inTrash)throw new Error(uiText("该项目仍在 Chrome 中，请先撤销未完成的操作。"));
         return {kind:'restore',id,before:{parentId:meta.trashId},after:restoreDestination(this,model,meta,entry),entry:structuredClone(entry)};
       }).sort((a,b)=>a.after.parentId.localeCompare(b.after.parentId)||(a.after.index??Infinity)-(b.after.index??Infinity));
     });
@@ -269,23 +276,23 @@ export class BookmarkEngine {
   async edit(id, title, url) {
     return this.run('编辑书签', async model => {
       const b = this.validateBookmark(model,id);
-      if (url !== b.url && !safeOpenUrl(url)) throw new Error('新网址需要使用 http、https、ftp 或 file 协议。');
+      if (url !== b.url && !safeOpenUrl(url)) throw new Error(uiText("新网址需要使用 http、https、ftp 或 file 协议。"));
       if (title === b.title && url === b.url) return [];
       return [{kind:'update',id,before:{title:b.title,url:b.url},after:{title,url}}];
     });
   }
   async createFolder(parentId, title) {
-    if ((await this.meta()).pending) throw new Error('请先撤销未完成的操作。');
-    if((await this.meta()).purgePending)throw new Error('请重新打开小屋以核对上次清空结果。');
+    if ((await this.meta()).pending) throw new Error(uiText("请先撤销未完成的操作。"));
+    if((await this.meta()).purgePending)throw new Error(uiText("请重新打开小屋以核对上次清空结果。"));
     const tree = await this.api.getTree(), model = flatten(tree,(await this.meta()).trashId), parent = model.nodes.get(parentId);
-    if (!title.trim()) throw new Error('请输入文件夹名称。');
-    if (!parent || parent.url !== undefined || parent.depth === 0 || parent.managed || parent.inTrash) throw new Error('请选择可写入的文件夹。');
+    if (!title.trim()) throw new Error(uiText("请输入文件夹名称。"));
+    if (!parent || parent.url !== undefined || parent.depth === 0 || parent.managed || parent.inTrash) throw new Error(uiText("请选择可写入的文件夹。"));
     await this.store.set('backup',{tree,date:Date.now()});
     return this.api.create({parentId,title:title.trim()});
   }
   async undo() {
     const meta=await this.meta(),entry=meta.pending||meta.history.at(-1);
-    if(meta.purgePending)throw new Error('请重新打开小屋以核对上次清空结果。');
+    if(meta.purgePending)throw new Error(uiText("请重新打开小屋以核对上次清空结果。"));
     if(!entry)return {restored:0,failed:0};
     await this.store.set('backup',{tree:await this.backupTree(),date:Date.now()});
     const rank=p=>p.kind==='archive'?0:p.kind==='create'?2:1;
@@ -299,20 +306,20 @@ export class BookmarkEngine {
         if(p.kind==='create'){
           if(!p.id)continue;
           let current;try{[current]=await this.api.get(id);}catch{continue;}
-          if(current.title!==p.after.title||current.url!==p.after.url||current.parentId!==resolveId(meta,p.after.parentId)||(current.url===undefined&&(await this.api.getChildren(id)).length))throw new Error('新增内容已有外部变化');
+          if(current.title!==p.after.title||current.url!==p.after.url||current.parentId!==resolveId(meta,p.after.parentId)||(current.url===undefined&&(await this.api.getChildren(id)).length))throw new Error(uiText("新增内容已有外部变化"));
           await this.api.remove(id);restored++;continue;
         }
-        const [current]=await this.api.get(id);if(!current)throw new Error('书签不存在');
+        const [current]=await this.api.get(id);if(!current)throw new Error(uiText("书签不存在"));
         if(p.kind==='move'){
           const before=resolveId(meta,p.before.parentId),after=resolveId(meta,p.after.parentId);
           if(current.parentId===before)continue;
-          if(current.parentId!==after)throw new Error('书签已由其他页面移动');
+          if(current.parentId!==after)throw new Error(uiText("书签已由其他页面移动"));
           const parent=(await this.model()).nodes.get(before);
-          if(!parent||parent.url!==undefined||parent.managed||parent.inTrash||parent.depth===0)throw new Error('原文件夹已变化');
+          if(!parent||parent.url!==undefined||parent.managed||parent.inTrash||parent.depth===0)throw new Error(uiText("原文件夹已变化"));
           const children=await this.api.getChildren(parent.id);await this.api.move(id,{parentId:parent.id,index:Math.min(p.before.index,children.length)});
         }else{
           if(current.title===p.before.title&&current.url===p.before.url)continue;
-          if(current.title!==p.after.title||current.url!==p.after.url)throw new Error('书签已被修改');
+          if(current.title!==p.after.title||current.url!==p.after.url)throw new Error(uiText("书签已被修改"));
           await this.api.update(id,p.before);
         }
         restored++;

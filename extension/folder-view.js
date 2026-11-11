@@ -1,9 +1,10 @@
+import {t as uiText} from './i18n.js';
 import {findDuplicates,folderContents} from './core.js';
 
 // Folder overview, list filters and export share the same subtree boundary.
 export function folderScope(model,id){
   const folder=model.nodes.get(id);
-  if(!folder||folder.url!==undefined||folder.inTrash||folder.depth===0)throw new Error('文件夹已变化，请刷新后再试。');
+  if(!folder||folder.url!==undefined||folder.inTrash||folder.depth===0)throw new Error(uiText("文件夹已变化，请刷新后再试。"));
   const contents=folderContents(model,id),ids=new Set(contents.ids);
   const books=model.bookmarks.filter(b=>!b.inTrash&&ids.has(b.id));
   const direct=books.filter(b=>b.parentId===id),duplicates=findDuplicates(books),duplicateIds=new Set(),keepers=new Map();
