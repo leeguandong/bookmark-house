@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
-import {installSidebarLayout} from '../sidebar-layout.js';
-const html=await readFile(new URL('../manager.html',import.meta.url),'utf8');
+import {installSidebarLayout} from '../extension/sidebar-layout.js';
+const html=await readFile(new URL('../extension/manager.html',import.meta.url),'utf8');
 const key='bookmark-house.sidebar-layout.v1';
 function fixture({saved=null,size=1440,blocked=false}={}){
   const dom=new JSDOM(html,{url:'http://sidebar-test.invalid/manager.html',pretendToBeVisual:true});

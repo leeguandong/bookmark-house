@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {BOOKMARK_CACHE_KEY} from '../bookmark-cache.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {BOOKMARK_CACHE_KEY} from '../extension/bookmark-cache.js';
 
 test('worker defers native prewarming until install/startup or changes, then keeps the closed-manager cache current',async()=>{
   globalThis.indexedDB=new IDBFactory();const api=new DemoAdapter(),store=new LocalStore('bookmark-house'),listeners={},events=new Map();
@@ -12,7 +12,7 @@ test('worker defers native prewarming until install/startup or changes, then kee
     contextMenus:{removeAll:callback=>callback(),create:(details,callback)=>callback(),onClicked:{addListener:fn=>listeners.click=fn}},commands:{onCommand:{addListener:fn=>listeners.command=fn}},tabs:{async create(){opens++;}}};
   const until=async(fn,label)=>{for(let i=0;i<200;i++){if(await fn())return;await new Promise(resolve=>realTimer(resolve,10));}throw new Error(label);};
   try{
-    await import(`../background.js?native-worker=${Date.now()}`);assert.equal(events.size,7);
+    await import(`../extension/background.js?native-worker=${Date.now()}`);assert.equal(events.size,7);
     assert.equal(await store.get(BOOKMARK_CACHE_KEY),undefined,'an ordinary capture wake does not scan the native library');
     listeners.installed();
     await until(async()=>(await store.get(BOOKMARK_CACHE_KEY))?.model.bookmarks.length===19,'initial prewarm');

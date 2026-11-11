@@ -3,12 +3,17 @@
   "version": "2.4.7",
   "type": "module",
   "private": true,
-  "description": "Chrome extension for local webpage collections and bookmark management",
+  "description": "A local-first Chrome extension for webpage collections and bookmark management",
   "scripts": {
-    "test": "node --test tests/*.mjs",
-    "audit:secrets": "node tools/audit_source.mjs",
+    "check:extension": "node scripts/check_extension.mjs",
+    "test:extension": "node --test tests/*.mjs",
+    "test:package": "python -B -m unittest discover -s tests -p test_*.py",
+    "test": "npm run test:extension && npm run test:package",
+    "audit:secrets": "python scripts/scan_secrets.py && node scripts/audit_source.mjs",
+    "audit:staged": "python scripts/scan_secrets.py --staged && node scripts/audit_source.mjs --staged",
     "prepare:hooks": "git config core.hooksPath .githooks",
-    "audit:staged": "python tools/scan_secrets.py --staged && node tools/audit_source.mjs --staged"
+    "check": "npm run check:extension && npm test && npm run audit:secrets",
+    "package": "node scripts/package.mjs"
   },
   "devDependencies": {
     "@secretlint/node": "^13.1.0",
@@ -17,5 +22,22 @@
     "jsdom": "^29.1.1",
     "secretlint": "^13.1.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leeguandong/bookmark-house.git"
+  },
+  "homepage": "https://github.com/leeguandong/bookmark-house#readme",
+  "bugs": {
+    "url": "https://github.com/leeguandong/bookmark-house/issues"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "keywords": [
+    "chrome-extension",
+    "bookmarks",
+    "web-clipper",
+    "local-first"
+  ]
 }

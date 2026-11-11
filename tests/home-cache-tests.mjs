@@ -2,11 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {IDBFactory} from 'fake-indexeddb';
 import {JSDOM} from 'jsdom';
-import {LocalStore} from '../local-store.js';
-import {WebCollection} from '../web-collection.js';
-import {HOME_CACHE_KEY,HOME_CACHE_LAYOUT_KEY,validHomeCache,rememberHomePreview} from '../home-cache.js';
-import {renderWebCollection} from '../web-collection-render.js';
-import {WebCollectionView} from '../web-collection-view.js';
+import {LocalStore} from '../extension/local-store.js';
+import {WebCollection} from '../extension/web-collection.js';
+import {HOME_CACHE_KEY,HOME_CACHE_LAYOUT_KEY,validHomeCache,rememberHomePreview} from '../extension/home-cache.js';
+import {renderWebCollection} from '../extension/web-collection-render.js';
+import {WebCollectionView} from '../extension/web-collection-view.js';
 globalThis.indexedDB=new IDBFactory();
 let fixtureId=0;
 async function fixture(){const name='home-cache-'+(++fixtureId),store=new LocalStore(name),repo=new WebCollection(store);await repo.add(Array.from({length:40},(_,i)=>({url:`https://a.test/${i}`,title:'收藏 '+i,note:'备注',preview:{summary:'真实的内容摘要',cover:'data:image/jpeg;base64,AAAA'}})));return {name,store,repo};}

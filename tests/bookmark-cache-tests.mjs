@@ -2,10 +2,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {BookmarkEngine,flatten,findDuplicates,treeSignature} from '../core.js';
-import {normalizeMeta,trashTree} from '../private-trash.js';
-import {BookmarkCache,BOOKMARK_CACHE_KEY,BOOKMARK_CACHE_STATE,validBookmarkCache,cachedBookmarkModel,watchBookmarkCache} from '../bookmark-cache.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {BookmarkEngine,flatten,findDuplicates,treeSignature} from '../extension/core.js';
+import {normalizeMeta,trashTree} from '../extension/private-trash.js';
+import {BookmarkCache,BOOKMARK_CACHE_KEY,BOOKMARK_CACHE_STATE,validBookmarkCache,cachedBookmarkModel,watchBookmarkCache} from '../extension/bookmark-cache.js';
 
 globalThis.indexedDB=new IDBFactory();let sequence=0;
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));

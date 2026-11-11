@@ -4,12 +4,12 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {BookmarkCache} from '../bookmark-cache.js';
-import {WebCollection} from '../web-collection.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {BookmarkCache} from '../extension/bookmark-cache.js';
+import {WebCollection} from '../extension/web-collection.js';
 
 test('cached folders are interactive before browser verification; identical verification preserves DOM; external edits refresh cache and UI',async()=>{
-  const page=new JSDOM(await readFile(new URL('../manager.html',import.meta.url),'utf8'),{url:'chrome-extension://cached-library/manager.html',pretendToBeVisual:true});
+  const page=new JSDOM(await readFile(new URL('../extension/manager.html',import.meta.url),'utf8'),{url:'chrome-extension://cached-library/manager.html',pretendToBeVisual:true});
   Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});
   Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
   const realTimer=setTimeout,timers=[];globalThis.setTimeout=(fn,delay,...args)=>{const timer=realTimer(fn,delay,...args);timer.unref();timers.push(timer);return timer;};
@@ -24,7 +24,7 @@ test('cached folders are interactive before browser verification; identical veri
   const $=selector=>document.querySelector(selector),wait=ms=>new Promise(resolve=>realTimer(resolve,ms));
   const until=async(fn,label)=>{for(let i=0;i<250;i++){if(fn())return;await wait(10);}throw new Error(label);};
   try{
-    await import(`../manager.js?warm-native=${Date.now()}`);
+    await import(`../extension/manager.js?warm-native=${Date.now()}`);
     await until(()=>$('#navAll').textContent==='19','cached library ready');assert.equal(treeReads,0,'opening does not wait for native API');
     $('[data-folder="1"]').click();assert.equal($('#pageTitle').textContent,'书签栏');assert.ok($('#list').textContent.includes('GitHub'));
     const folder=$('[data-folder="1"]'),list=$('#list').firstElementChild;

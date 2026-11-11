@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore} from '../local-store.js';
-import {WebCollection} from '../web-collection.js';
-import {capturePageDetails} from '../quick-capture.js';
-const html=await readFile(new URL('../popup.html',import.meta.url),'utf8');
+import {LocalStore} from '../extension/local-store.js';
+import {WebCollection} from '../extension/web-collection.js';
+import {capturePageDetails} from '../extension/quick-capture.js';
+const html=await readFile(new URL('../extension/popup.html',import.meta.url),'utf8');
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(fn,label){for(let i=0;i<200;i++){if(fn())return;await delay(10);}throw new Error(label);}
 
@@ -24,7 +24,7 @@ test('popup becomes usable and saves in one commit while an old-card lookup is b
   globalThis.chrome={tabs:{async query(){return [{id:10,url,title:'网页的新标题'}];}},scripting:{async executeScript(args){assert.equal(args.injectImmediately,true);return [{result:{url,title:'网页的新标题',description:'来自网页的新摘要'}}];}}};
   const $=selector=>document.querySelector(selector);
   try{
-    await import('../popup.js?speed');
+    await import('../extension/popup.js?speed');
     await until(()=>lookupWaiting&&!$('#capturePage').disabled,'popup ready before lookup');
     assert.equal($('#currentTitle').textContent,'网页的新标题');assert.equal($('#openHouse').disabled,false);
     await repository.edit(ids[0],{url,title:first.title,note:'在另一个窗口刚更新的备注'});commits=0;
@@ -49,7 +49,7 @@ test('late duplicate lookup preserves text already being typed into the popup',a
   globalThis.chrome={tabs:{async query(){return [{id:10,url,title:'文章'}];}}};
   const $=selector=>document.querySelector(selector);
   try{
-    await import('../popup.js?note-race');await until(()=>waiting&&!$('#capturePage').disabled,'popup ready');
+    await import('../extension/popup.js?note-race');await until(()=>waiting&&!$('#capturePage').disabled,'popup ready');
     $('#captureNote').value='正在写的新想法';$('#captureNote').dispatchEvent(new page.window.Event('input',{bubbles:true}));release();
     await until(()=>$('#capturePage').textContent==='更新备注','lookup finished');assert.equal($('#captureNote').value,'正在写的新想法');
   }finally{release();WebCollection.prototype.read=read;delete globalThis.chrome;page.window.close();}

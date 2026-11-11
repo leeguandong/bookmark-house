@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
-const root=new URL('../',import.meta.url);
+const root=new URL('../extension/',import.meta.url);
 const [html,boot,css]=await Promise.all(['popup.html','popup-boot.js','popup.css'].map(name=>readFile(new URL(name,root))));
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const release=JSON.parse(await readFile(new URL('manifest.json',root),'utf8')).version;

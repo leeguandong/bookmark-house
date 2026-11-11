@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {installWebDrop} from '../web-collection-view.js';
+import {installWebDrop} from '../extension/web-collection-view.js';
 function setup(){
   const page=new JSDOM('<body><section id="webPanel"><div id="drop">拖进来</div></section><input id="webUrl"><input id="webTitle"><textarea id="note"></textarea><div data-drop-folder="1" id="folder">Chrome 文件夹</div></body>');
   const saved=[],errors=[];let visible=true,blocked=false;

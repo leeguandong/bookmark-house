@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {WebCollectionView} from '../web-collection-view.js';
+import {WebCollectionView} from '../extension/web-collection-view.js';
 
 test('opening a collection reads no remote pages; only rendered cards are checked later and hidden views do no work',async()=>{
   const page=new JSDOM('<section id="cards"></section>',{pretendToBeVisual:true,url:'https://synthetic.test/'});

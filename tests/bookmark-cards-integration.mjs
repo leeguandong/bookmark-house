@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {DemoAdapter,LocalStore} from '../adapter.js';
-import {WebCollection} from '../web-collection.js';
+import {DemoAdapter,LocalStore} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
 
 test('native card grid paginates, keeps checkbox focus, excludes managed items, reuses text and moves selected cards by dragging',async()=>{
-  const page=new JSDOM(await readFile(new URL('../manager.html',import.meta.url),'utf8'),{url:'chrome-extension://native-cards/manager.html',pretendToBeVisual:true});
+  const page=new JSDOM(await readFile(new URL('../extension/manager.html',import.meta.url),'utf8'),{url:'chrome-extension://native-cards/manager.html',pretendToBeVisual:true});
   Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
   const realTimer=setTimeout,timers=[];globalThis.setTimeout=(fn,delay,...args)=>{const timer=realTimer(fn,delay,...args);timer.unref();timers.push(timer);return timer;};globalThis.requestAnimationFrame=fn=>setTimeout(fn,16);globalThis.cancelAnimationFrame=clearTimeout;globalThis.BroadcastChannel=class{postMessage(){}close(){}};
   page.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};page.window.HTMLDialogElement.prototype.close=function(){this.open=false;};
@@ -23,7 +23,7 @@ test('native card grid paginates, keeps checkbox focus, excludes managed items, 
   const card=id=>all('[data-bookmark-card]').find(node=>node.dataset.bookmarkCard===id);
   const dragEvent=(node,type,dataTransfer)=>{const event=new page.window.Event(type,{bubbles:true,cancelable:true});Object.defineProperty(event,'dataTransfer',{value:dataTransfer});node.dispatchEvent(event);return event;};
   try{
-    await import(`../manager.js?native-cards=${Date.now()}`);await until(()=>$('#navAll').textContent==='65','native ready');
+    await import(`../extension/manager.js?native-cards=${Date.now()}`);await until(()=>$('#navAll').textContent==='65','native ready');
     $('[data-view="all"]').click();assert.equal($('#list table'),null);assert.equal(all('.bookmark-card').length,60);assert.equal($('#pageNumber').textContent,'1 / 2');assert.ok(card(newest.id).textContent.includes('来自已有网页收藏'));
     assert.ok(card(managed.id).querySelector('[data-select]').disabled);
     $('#selectPage').checked=true;change($('#selectPage'));assert.equal($('#selectedCount').textContent,'59');assert.equal(document.activeElement.id,'selectPage');assert.equal(all('.bookmark-card.selected').length,59);

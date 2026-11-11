@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {WebCollection} from '../web-collection.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
 
 test('folder labels expand children; right-click and keyboard deletion sync the browser tree and preserve webpage cards',async()=>{
-  const html=await readFile(new URL('../manager.html',import.meta.url),'utf8');
+  const html=await readFile(new URL('../extension/manager.html',import.meta.url),'utf8');
   const page=new JSDOM(html,{url:'chrome-extension://folder-test/manager.html',pretendToBeVisual:true});
   Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});
   Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
@@ -26,7 +26,7 @@ test('folder labels expand children; right-click and keyboard deletion sync the 
   const context=(anchor,x=100,y=300)=>{const event=new page.window.MouseEvent('contextmenu',{bubbles:true,cancelable:true,clientX:x,clientY:y,button:2});anchor.dispatchEvent(event);assert.ok(event.defaultPrevented);};
   const submit=()=>$('#dialogForm').dispatchEvent(new page.window.Event('submit',{bubbles:true,cancelable:true}));
   try{
-    await import(`../manager.js?folder-context=${Date.now()}`);await until(()=>$('#navAll').textContent==='20','startup');
+    await import(`../extension/manager.js?folder-context=${Date.now()}`);await until(()=>$('#navAll').textContent==='20','startup');
     assert.equal($('#bookmarkSection').open,false);assert.equal($('.folder-more'),null);
     assert.equal($('#bookmarkSection>summary span').textContent,'书签库');assert.ok($('.sidebar-footer').textContent.includes('留住好内容'));
     $('#bookmarkSection>summary').click();

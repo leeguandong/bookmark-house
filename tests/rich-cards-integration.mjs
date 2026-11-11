@@ -2,10 +2,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {readDocumentPreview,thumbnail} from '../page-preview.js';
-import {capturePageDetails} from '../quick-capture.js';
-import {WebCollection} from '../web-collection.js';
-import {WebCollectionView} from '../web-collection-view.js';
+import {readDocumentPreview,thumbnail} from '../extension/page-preview.js';
+import {capturePageDetails} from '../extension/quick-capture.js';
+import {WebCollection} from '../extension/web-collection.js';
+import {WebCollectionView} from '../extension/web-collection-view.js';
 class Store{value=null;async get(){return structuredClone(this.value);}async set(k,v){this.value=structuredClone(v);}}
 test('in-page extraction reads metadata or an article excerpt and skips navigation and form fields',()=>{
   const long='这是一段真实文章的开头，说明在复杂的网页当中，我们仍然应该找到与文章本身有关的内容而不是导航、广告和表单。';

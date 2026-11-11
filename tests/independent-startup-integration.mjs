@@ -4,12 +4,12 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {WebCollection} from '../web-collection.js';
-import {BookmarkCache} from '../bookmark-cache.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
+import {BookmarkCache} from '../extension/bookmark-cache.js';
 
 test('a warm library remains usable while the full card read and another tab write lock are held; late cards preserve the chosen folder',async()=>{
-  const page=new JSDOM(await readFile(new URL('../manager.html',import.meta.url),'utf8'),{url:'chrome-extension://independent-startup/manager.html',pretendToBeVisual:true});
+  const page=new JSDOM(await readFile(new URL('../extension/manager.html',import.meta.url),'utf8'),{url:'chrome-extension://independent-startup/manager.html',pretendToBeVisual:true});
   Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});
   Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
   const realTimer=setTimeout,timers=[];globalThis.setTimeout=(fn,delay,...args)=>{const timer=realTimer(fn,delay,...args);timer.unref();timers.push(timer);return timer;};
@@ -26,7 +26,7 @@ test('a warm library remains usable while the full card read and another tab wri
   LocalStore.prototype.get=async function(key){if(key==='webCollectionV1'){waiting=true;await cardsGate;}return originalGet.call(this,key);};
   const $=selector=>document.querySelector(selector),until=async(fn,label)=>{for(let i=0;i<200;i++){if(fn())return;await new Promise(resolve=>realTimer(resolve,10));}throw new Error(label);};
   try{
-    await import('../manager-start.js');
+    await import('../extension/manager-start.js');
     await until(()=>waiting&&$('#navAll').textContent==='19','independent native startup');
     assert.equal(writeLocks,0,'ordinary startup must not wait for an unrelated write lock');
     assert.notEqual(document.body.inert,true);

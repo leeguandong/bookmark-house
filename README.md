@@ -1,48 +1,98 @@
-# 书签小屋
+<p align="center">
+  <img src="extension/icons/128.png" width="72" height="72" alt="书签小屋图标">
+</p>
 
-Chrome Manifest V3 扩展，用于网页卡片收藏与原生书签管理。当前版本为 2.4.7，采用 MIT 许可证开源。
+<h1 align="center">书签小屋 · Bookmark House</h1>
+<p align="center">留住好内容，随时回来看看。</p>
+<p align="center">
+  <a href="https://github.com/leeguandong/bookmark-house/actions/workflows/ci.yml"><img src="https://github.com/leeguandong/bookmark-house/actions/workflows/ci.yml/badge.svg" alt="项目检查"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-326d58" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/Chrome-109%2B-555b63" alt="Chrome 109+">
+</p>
+<p align="center">
+  <a href="#快速开始">快速开始</a> · <a href="docs/getting-started.md">使用指南</a> · <a href="docs/development.md">开发指南</a> · <a href="CONTRIBUTING.md">参与贡献</a> · <a href="https://leeguandong.github.io/bookmark-house-privacy/">隐私政策</a>
+</p>
 
-[公开隐私政策](https://leeguandong.github.io/bookmark-house-privacy/) · [源码审核记录](docs/source-audit.md) · [许可证](LICENSE)
+书签小屋是一款开源 Chrome 扩展，把网页卡片收藏与浏览器书签管理放在同一个空间。看到值得保留的内容，可以随手保存；回来时，通过封面、摘句、备注和收藏日期找到它。
 
-## 功能
+扩展无需注册账号，也无需配置 API key。收藏、缓存和回收站保存在当前浏览器的本地扩展空间，内容分析与摘要由本地规则完成。
 
-- 工具栏、右键、快捷键、粘贴或拖拽保存网页，按日期显示卡片、摘要和预览。
-- 搜索、星标、备注、阅读状态、文件夹整理及内容分析。
-- 管理 Chrome 的真实书签；网页收藏与书签各自保存、删除和恢复。
-- 本地回收站、撤销与导入导出。权限和数据行为见 [隐私政策](privacy.html)。
+## 能做什么
 
-## 本地加载
+| 功能 | 使用方式 |
+| --- | --- |
+| 随手保存网页 | 工具栏、右键菜单、快捷键、粘贴分享内容，或拖入网址与网页链接 |
+| 用卡片回顾内容 | 按收藏日期查看封面、正文摘句和备注，支持搜索、星标和阅读状态 |
+| 管理书签库 | 浏览真实书签目录，拖动卡片归档，右键管理文件夹，修改同步作用于 Chrome 书签 |
+| 整理与分析 | 预览整理方案，查看主题、关键词、网站来源和时间分布 |
+| 找回与备份 | 按来源删除、恢复和清理，支持本地撤销与导入导出 |
 
-打开 `chrome://extensions`，启用开发者模式，选择“加载已解压的扩展程序”，选中此仓库根目录。工具栏图标用于保存当前网页；扩展选项页打开收藏管理界面。`Alt+Shift+S` 可保存当前网页，macOS 默认使用 `Command+Shift+S`。
+**网页收藏与浏览器书签各自独立。** 同一网址可以同时存在于两边，删除当前这一份会保留另一份。Chrome 原生书签是否跨设备同步，由浏览器自身的同步设置决定。
 
-不要删除原本地安装的数据。商店安装版与本地加载版可能具有不同扩展 ID，更换前先导出网页收藏 JSON，并在新安装中核对导入结果。
+## 快速开始
 
-## 开发与检查
+当前源码版本为 **2.4.7**。支持 Chrome 109 及以上，无需构建即可加载。
 
-开发依赖：Node.js 24、npm、Python 3.10+、Git。扩展运行不依赖开发用的 npm 模块。
+1. [下载源码 ZIP](https://github.com/leeguandong/bookmark-house/archive/refs/heads/main.zip) 并解压，或克隆本仓库。
+2. 在 Chrome 打开 `chrome://extensions`，开启“开发者模式”。
+3. 点击“加载已解压的扩展程序”，选择仓库里的 **`extension/` 文件夹**。
+4. 固定工具栏中的书签小屋图标，打开一个普通网页，点击图标保存。
+5. 点击弹窗中的“打开我的收藏”，进入管理界面。
+
+Windows / Linux 默认快捷键为 `Alt+Shift+S`，macOS 为 `Command+Shift+S`，可在 `chrome://extensions/shortcuts` 调整。
+
+已有安装请先导出重要收藏，并保留原扩展。商店安装版与源码加载版可能使用不同的扩展 ID，数据不会自动互通。详见[安装与数据迁移](docs/getting-started.md)。
+
+## 保存与内容提取
+
+- 拖拽支持地址栏的网址、网页内链接和其他应用分享的链接；Chrome 顶部的整个标签页不能直接拖入管理页面。
+- 保存当前页使用用户主动触发的临时访问权限。补充已保存页面时，会按需请求对应站点的可选权限。
+- 动态页面、登录限制或网站防护可能影响封面和正文提取；可以保留原页打开后重试，也可自行编辑标题、摘句和备注。
+- 扩展没有接入远程 AI、广告或第三方统计服务。详细数据处理方式见[隐私政策](https://leeguandong.github.io/bookmark-house-privacy/)。
+
+## 项目结构
 
 ```text
+bookmark-house/
+├── extension/       # 可直接加载的扩展，manifest.json 位于此处
+├── tests/           # 使用合成数据的单元测试与集成测试
+├── scripts/         # 源码检查、敏感信息扫描与打包工具
+├── docs/            # 使用、开发、架构和隐私文档
+├── .github/         # 自动检查、Issue 和 PR 模板
+├── CHANGELOG.md     # 版本记录
+├── CONTRIBUTING.md  # 贡献指南
+├── SECURITY.md      # 安全问题与敏感信息处理
+└── LICENSE          # MIT 许可证
+```
+
+扩展使用原生 JavaScript 模块、HTML 和 CSS，不依赖前端框架或运行时 npm 模块。工程目录与实际加载目录分开，运行文件之间的相对路径保持完整。
+
+## 本地开发
+
+需要 Node.js 24、npm、Python 3.10+ 和 Git。以下命令在仓库根目录执行：
+
+```bash
 npm ci --ignore-scripts
-npm test
-python tools/scan_secrets.py
-npm run audit:secrets
-git config core.hooksPath .githooks
+npm run prepare:hooks
+npm run check
 ```
 
-测试使用合成数据和模拟 DOM/IndexedDB，不读取真实 Chrome 书签或浏览器资料。需要历史诊断截图或真实页面抓取内容的临时测试不收入仓库。密钥检查使用本地规则及 Secretlint 推荐规则；提交前检查扫描 Git 暂存区的实际内容，报告不打印命中值。
+| 命令 | 用途 |
+| --- | --- |
+| `npm test` | 运行扩展行为测试与打包测试 |
+| `npm run audit:secrets` | 在本机扫描已跟踪文件中的常见凭据 |
+| `npm run audit:staged` | 检查暂存区的实际内容 |
+| `npm run check` | 检查扩展资源、运行测试并扫描敏感信息 |
+| `npm run package` | 生成 `dist/` 下可分发的扩展 ZIP 与文件报告 |
 
-```text
-python tools/package_extension.py --source . --output ../artifacts/bookmark-house-2.4.7.zip --exclude index.html
-```
+测试使用模拟 DOM、IndexedDB 和合成网址，不读取真实 Chrome 个人资料。自动检查覆盖同一套命令。更多说明见[开发指南](docs/development.md)与[架构说明](docs/architecture.md)。
 
-打包器排除开发文件、检查声明资源及 ZIP 根目录，并生成文件与哈希报告。正式提交前仍需检查实际界面、动态依赖和商店要求。详细版本记录见 [README.txt](README.txt)。
+## 参与与反馈
 
-## 仓库范围
+欢迎提交 [Issue](https://github.com/leeguandong/bookmark-house/issues) 和 Pull Request。提交问题时请附上版本、复现步骤与预期结果，并使用合成链接或脱敏示例。请勿公开真实收藏导出、Cookie、登录令牌或个人页面快照。
 
-仓库只保存扩展源码、图标、文档、合成数据测试和开发检查脚本。个人收藏、备份、浏览器数据库、发布后台截图、密钥、令牌和依赖安装目录不属于源码，不应提交。
+贡献流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。潜在漏洞或敏感信息请按 [SECURITY.md](SECURITY.md) 私下报告。
 
-源码与既有隐私政策共用 `bookmark-house-privacy` 仓库。根目录 `index.html` 是商店使用的独立政策页面；修改源码时请保留此页面与现有政策网址。扩展实际入口为 `manifest.json` 中声明的弹窗和管理页面。
+## 许可证
 
-## 开源与数据
-
-项目代码与随附图标按 [MIT 许可证](LICENSE) 提供。开发依赖通过 npm 单独安装，保留各自许可证，不打入扩展运行包。本项目不需要配置开发者 API key，也未集成远程 AI 服务。请勿把真实收藏、账号凭据或完整网页快照作为问题附件提交；可用合成链接与脱敏样例复现问题。
+项目代码与随附图标采用 [MIT 许可证](LICENSE)。通过 npm 安装的开发依赖保留各自许可证。

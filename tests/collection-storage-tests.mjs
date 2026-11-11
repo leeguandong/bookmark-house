@@ -1,11 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore} from '../adapter.js';
-import {WebCollection,WEB_COLLECTION_KEY,collectionBackup} from '../web-collection.js';
-import {AutoPreview} from '../auto-preview.js';
-import {COLLECTION_LAYOUT_KEY,COLLECTION_BACKUP_KEY} from '../collection-storage.js';
-import {WebCollectionView} from '../web-collection-view.js';
+import {LocalStore} from '../extension/adapter.js';
+import {WebCollection,WEB_COLLECTION_KEY,collectionBackup} from '../extension/web-collection.js';
+import {AutoPreview} from '../extension/auto-preview.js';
+import {COLLECTION_LAYOUT_KEY,COLLECTION_BACKUP_KEY} from '../extension/collection-storage.js';
+import {WebCollectionView} from '../extension/web-collection-view.js';
 import {JSDOM} from 'jsdom';
 globalThis.indexedDB=new IDBFactory();
 const cover='data:image/jpeg;base64,'+'A'.repeat(100000);

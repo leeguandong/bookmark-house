@@ -19,7 +19,7 @@ def selected(path,patterns):
     return any(fnmatch.fnmatchcase(path,pattern) for pattern in patterns)
 
 
-def build(source,output,includes=(),excludes=(),overwrite=False):
+def build(source,output,includes=(),excludes=(),overwrite=False,license_file=None):
     source=Path(source).resolve(); output=Path(output).resolve()
     if not source.is_dir(): raise ValueError('Extension directory does not exist')
     if output.is_relative_to(source): raise ValueError('Place output ZIP outside the source directory')
@@ -42,6 +42,15 @@ def build(source,output,includes=(),excludes=(),overwrite=False):
         if low.startswith('.env') or low in PRIVATE_NAMES or low.endswith(('.pem','.key','.p12','.pfx')):
             raise ValueError('Remove private/credential data from runtime files: '+relative)
         entries.append((relative,path))
+    if license_file is not None:
+        license_path=Path(license_file).resolve()
+        if not license_path.is_file() or Path(license_file).is_symlink():
+            raise ValueError('Expected a readable license file')
+        if not license_path.read_text(encoding='utf-8').startswith('MIT License\n'):
+            raise ValueError('Expected the project MIT license')
+        if any(name=='LICENSE' for name,path in entries):
+            raise ValueError('LICENSE is already included in the source directory')
+        entries.append(('LICENSE',license_path))
     names={name for name,path in entries}
     if 'manifest.json' not in names: raise ValueError('manifest.json must be included at ZIP root')
     for resource in declared_resources(manifest):
@@ -78,8 +87,9 @@ def main():
     parser.add_argument('--source',required=True); parser.add_argument('--output',required=True)
     parser.add_argument('--include',action='append',default=[],help='Relative POSIX glob; repeat as needed')
     parser.add_argument('--exclude',action='append',default=[]); parser.add_argument('--overwrite',action='store_true')
+    parser.add_argument('--license-file',help='Project MIT license to include at ZIP root')
     args=parser.parse_args()
-    try: report=build(args.source,args.output,args.include,args.exclude,args.overwrite)
+    try: report=build(args.source,args.output,args.include,args.exclude,args.overwrite,args.license_file)
     except (ValueError,OSError,json.JSONDecodeError) as error: parser.exit(2,str(error)+'\n')
     print(json.dumps({key:report[key] for key in ('package','version','sha256','bytes')},ensure_ascii=True))
 

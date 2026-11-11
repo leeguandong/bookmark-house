@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
-python tools/scan_secrets.py --staged
-node tools/audit_source.mjs --staged
+python scripts/scan_secrets.py --staged
+node scripts/audit_source.mjs --staged

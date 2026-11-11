@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {WebCollection} from '../web-collection.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
 
 test('Xiaohongshu bookmarks share cached covers and real content across view changes without cross-source edits',async()=>{
-  const page=new JSDOM(await readFile(new URL('../manager.html',import.meta.url),'utf8'),{url:'chrome-extension://rich-native/manager.html',pretendToBeVisual:true});
+  const page=new JSDOM(await readFile(new URL('../extension/manager.html',import.meta.url),'utf8'),{url:'chrome-extension://rich-native/manager.html',pretendToBeVisual:true});
   Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
   const realTimer=setTimeout,timers=[];globalThis.setTimeout=(fn,delay,...args)=>{const timer=realTimer(fn,delay,...args);timer.unref();timers.push(timer);return timer;};globalThis.requestAnimationFrame=fn=>setTimeout(fn,16);globalThis.cancelAnimationFrame=clearTimeout;globalThis.BroadcastChannel=class{postMessage(){}close(){}};
   page.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};page.window.HTMLDialogElement.prototype.close=function(){this.open=false;};
@@ -23,7 +23,7 @@ test('Xiaohongshu bookmarks share cached covers and real content across view cha
   const until=async(fn,label)=>{for(let i=0;i<250;i++){if(fn())return;await wait(10);}throw new Error(label);};
   const card=id=>$(`[data-bookmark-card="${id}"]`);
   try{
-    await import(`../manager.js?rich-bookmarks=${Date.now()}`);await until(()=>$('#navAll').textContent==='21','startup');
+    await import(`../extension/manager.js?rich-bookmarks=${Date.now()}`);await until(()=>$('#navAll').textContent==='21','startup');
     $('[data-view="all"]').click();assert.equal(card(a.id).querySelector('.web-card-title').textContent,'阅读空间的采光与收纳');assert.ok(card(a.id).textContent.includes('柔和采光'));assert.ok(card(b.id).textContent.includes('旅行线路'));assert.ok(!card(b.id).textContent.includes('柔和采光'));
     assert.equal(card(a.id).querySelector('img').getAttribute('src'),null);assert.equal(requests.length,1,'native view waits for the existing web cover read');
     release();await until(()=>card(a.id).querySelector('img')?.getAttribute('src')===coverA,'shared first cover');assert.equal(card(b.id).querySelector('img').getAttribute('src'),coverB);assert.equal(requests.length,1);

@@ -4,11 +4,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore,DemoAdapter} from '../adapter.js';
-import {WebCollection} from '../web-collection.js';
+import {LocalStore,DemoAdapter} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
 
 test('first cards render before native bookmarks; card updates, focus and background previews avoid redundant work',async()=>{
-  const html=await readFile(new URL('../manager.html',import.meta.url),'utf8');
+  const html=await readFile(new URL('../extension/manager.html',import.meta.url),'utf8');
   const page=new JSDOM(html,{url:'chrome-extension://synthetic-performance/manager.html',pretendToBeVisual:true});
   Object.assign(globalThis,{window:page.window,document:page.window.document,location:page.window.location,indexedDB:new IDBFactory(),innerWidth:1440,innerHeight:900});
   Object.defineProperty(globalThis,'navigator',{value:page.window.navigator,configurable:true});
@@ -28,7 +28,7 @@ test('first cards render before native bookmarks; card updates, focus and backgr
   const repo=new WebCollection(new LocalStore('bookmark-house'));
   const {ids}=await repo.add([{url:'https://a.test/a',title:'第一篇文章',preview:{summary:'文章的实际摘要'}},{url:'https://b.test/b',title:'第二篇文章'}]);
   try{
-    await import(`../manager.js?perf-integration=${Date.now()}`);
+    await import(`../extension/manager.js?perf-integration=${Date.now()}`);
     await until(()=>$('#webPanel .web-card')&&treeReads===1,'first cards while native tree is pending');
     assert.equal($('#navAll').textContent,'—');releaseTree();
     await until(()=>$('#navAll').textContent==='19'&&nativeEvents.size===6,'native ready');

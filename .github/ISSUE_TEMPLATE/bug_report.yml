@@ -1,0 +1,32 @@
+name: 问题反馈
+description: 报告可以复现的功能问题
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: 请使用合成链接和脱敏截图。不要提交 API key、Cookie、个人收藏导出或私人页面内容；安全问题请按 SECURITY.md 私下报告。
+  - type: input
+    id: version
+    attributes:
+      label: 扩展版本与 Chrome 版本
+      placeholder: 例如：书签小屋 2.4.7，Chrome 版本，操作系统
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 从哪个页面开始，按什么顺序操作？
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充说明
+      description: 可附脱敏截图；不要附真实收藏或浏览器资料。

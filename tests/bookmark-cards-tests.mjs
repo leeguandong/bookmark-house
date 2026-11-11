@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {renderBookmarkCard,bookmarkPreviewIndex,bookmarkPreviewKey} from '../bookmark-cards.js';
-import {collectionCardData} from '../collection-card.js';
+import {renderBookmarkCard,bookmarkPreviewIndex,bookmarkPreviewKey} from '../extension/bookmark-cards.js';
+import {collectionCardData} from '../extension/collection-card.js';
 
 const item={id:'one',title:'标题 <script>alert(1)</script>',url:'https://example.com/article',dateAdded:1762000000000};
 test('cards retain safe links and real text, escape all content and load no remote images',()=>{

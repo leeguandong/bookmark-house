@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {JSDOM} from 'jsdom';
-import {renderBookmarkCard,bookmarkPreviewIndex,bookmarkPreviewKey} from '../bookmark-cards.js';
-import {renderWebCollection} from '../web-collection-render.js';
+import {renderBookmarkCard,bookmarkPreviewIndex,bookmarkPreviewKey} from '../extension/bookmark-cards.js';
+import {renderWebCollection} from '../extension/web-collection-render.js';
 
 const date=1762000000000,url='https://www.xiaohongshu.com/explore/abcdef0123456789abcdef01';
 const first={id:'saved-one',url,title:'第一篇：安静的阅读空间',note:'把这份空间设计留给下一次整理。',savedAt:date,createdAt:date,updatedAt:date,readAt:null,deletedAt:null,starred:false,

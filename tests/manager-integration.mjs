@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {IDBFactory} from 'fake-indexeddb';
-import {LocalStore} from '../adapter.js';
-import {WebCollection} from '../web-collection.js';
-const html=await readFile(new URL('../manager.html',import.meta.url),'utf8');
+import {LocalStore} from '../extension/adapter.js';
+import {WebCollection} from '../extension/web-collection.js';
+const html=await readFile(new URL('../extension/manager.html',import.meta.url),'utf8');
 const nativeTimeout=globalThis.setTimeout,nativeClearTimeout=globalThis.clearTimeout,timers=new Set();
 const idb=new IDBFactory();let page,loadNumber=0;
 function setup(){
@@ -21,7 +21,7 @@ function setup(){
 }
 const $=selector=>document.querySelector(selector);
 async function until(condition,label){for(let i=0;i<150;i++){if(condition())return;await new Promise(resolve=>nativeTimeout(resolve,10));}throw new Error(`Not ready: ${label}; ${$('#list')?.textContent}; ${$('#status')?.textContent}`);}
-async function load(){setup();await import(new URL(`../manager.js?dom-check=${++loadNumber}`,import.meta.url));await until(()=>$('#webPanel .web-card')&&['19','20'].includes($('#navAll').textContent),'startup');}
+async function load(){setup();await import(new URL(`../extension/manager.js?dom-check=${++loadNumber}`,import.meta.url));await until(()=>$('#webPanel .web-card')&&['19','20'].includes($('#navAll').textContent),'startup');}
 function click(selector){const el=$(selector);assert.ok(el,selector);el.click();}
 function submit(){ $('#dialogForm').dispatchEvent(new page.window.Event('submit',{bubbles:true,cancelable:true})); }
 function dropped(url,title){const event=new page.window.Event('drop',{bubbles:true,cancelable:true});Object.defineProperty(event,'dataTransfer',{value:{types:['text/uri-list','text/html'],getData(type){return type==='text/uri-list'?url:type==='text/html'?`<a href="${url}">${title}</a>`:'';}}});$('#webPanel .web-capture').dispatchEvent(event);}
